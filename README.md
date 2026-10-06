@@ -16,6 +16,7 @@ The application is not implemented yet. Behaviour is defined in the cahier des c
 | --- | --- |
 | [Cahier des charges](documentation/CAHIER_DES_CHARGES.md) | Scope, database, architecture, diagrams, and acceptance |
 | [Development plan](documentation/DEVELOPMENT_PLAN.md) | Phases, module ownership, Git workflow, tests, and demo |
+| [Screen mockups](documentation/MOCKUPS.md) | Phone screens for every feature |
 
 ## Stack
 
