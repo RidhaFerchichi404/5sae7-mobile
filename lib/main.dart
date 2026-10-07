@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/navigation/app_routes.dart';
 import 'core/navigation/app_shell.dart';
 import 'core/theme/app_theme.dart';
-import 'shared/widgets/placeholder_screen.dart';
+import 'features/dashboard/presentation/dashboard_screen.dart';
+import 'features/dashboard/presentation/statistics_screen.dart';
 
 // Feature providers belong in each feature's presentation folder.
 // This root only provides the shared [ProviderScope].
@@ -23,8 +24,8 @@ class MyBudgetApp extends StatelessWidget {
       theme: AppTheme.light,
       home: const AppShell(),
       routes: {
-        for (final route in AppRoutes.all)
-          route: (_) => PlaceholderScreen(title: AppRoutes.titleFor(route)),
+        AppRoutes.dashboard: (_) => const DashboardScreen(),
+        AppRoutes.statistics: (_) => const StatisticsScreen(),
       },
     );
   }

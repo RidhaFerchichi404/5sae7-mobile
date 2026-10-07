@@ -1,54 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../shared/widgets/placeholder_screen.dart';
+import '../../features/users/presentation/profile_gate_screen.dart';
+import '../../features/users/presentation/user_providers.dart';
+import '../../shared/widgets/error_view.dart';
+import '../../shared/widgets/loading_indicator.dart';
+import 'home_shell.dart';
 
-/// Shell shown before a feature owns the active profile.
+/// Chooses the profile gate or the main shell from the active profile.
 /// Feature providers stay in each feature's presentation folder.
-class AppShell extends StatefulWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key});
 
   @override
-  State<AppShell> createState() => _AppShellState();
-}
-
-class _AppShellState extends State<AppShell> {
-  int _index = 0;
-
-  static const _destinations = [
-    (label: 'Dashboard', icon: Icons.home_outlined, selected: Icons.home),
-    (
-      label: 'Transactions',
-      icon: Icons.receipt_long_outlined,
-      selected: Icons.receipt_long,
-    ),
-    (
-      label: 'Budgets',
-      icon: Icons.pie_chart_outline,
-      selected: Icons.pie_chart,
-    ),
-    (label: 'More', icon: Icons.more_horiz, selected: Icons.more_horiz),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final current = _destinations[_index];
-    return Scaffold(
-      body: PlaceholderScreen(
-        title: current.label,
-        message: 'Shared placeholder. The feature owner will replace this screen.',
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(activeUserIdProvider);
+    return active.when(
+      loading: () => const Scaffold(body: LoadingIndicator()),
+      error: (error, _) => Scaffold(
+        body: ErrorView(
+          message: error.toString(),
+          onRetry: () => ref.invalidate(activeUserIdProvider),
+        ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (index) => setState(() => _index = index),
-        destinations: [
-          for (final destination in _destinations)
-            NavigationDestination(
-              icon: Icon(destination.icon),
-              selectedIcon: Icon(destination.selected),
-              label: destination.label,
-            ),
-        ],
-      ),
+      data: (userId) {
+        if (userId == null) {
+          return const ProfileGateScreen();
+        }
+        return HomeShell(userId: userId);
+      },
     );
   }
 }

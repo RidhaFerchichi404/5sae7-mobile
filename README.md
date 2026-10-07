@@ -8,7 +8,7 @@
 
 MyBudget is an offline Android application for personal finance. A local profile records income and expenses, organises them by category, sets a spending limit, and shows the situation on a dashboard.
 
-The shared app shell and the SQLite foundation are in place. Feature modules are not implemented yet. Behaviour is defined in the cahier des charges. The build order is defined in the development plan.
+Profiles, categories, transactions, budgets, the dashboard, and statistics are implemented. Every figure is calculated when a screen opens. Nothing extra is stored. Behaviour is defined in the cahier des charges. The build order is defined in the development plan.
 
 ## Documentation
 
@@ -38,7 +38,16 @@ Four developers. Each developer owns one table and the full module around it: mo
 | Developer 3 | Transactions |
 | Developer 4 | Budgets |
 
-Shared setup is done once, before the feature branches. Phase 0 of the development plan is the gate: nobody starts feature code before that sign-off.
+The dashboard and statistics read those four modules. They do not own a table.
+
+## Features
+
+- A profile stores a name, an email, and a currency label. Creating one inserts 13 categories.
+- Categories cover expenses and income. A category that is still in use must be reassigned before it can be deleted.
+- Transactions are income or expenses. History can be searched, filtered, and sorted.
+- Budgets limit an expense category for a month or a custom range. Spent, remaining, and the warning state are calculated from expenses.
+- The dashboard shows balance, this month, remaining budget, warnings, category spending, and recent transactions.
+- Statistics show a selected month, a six-month series, the most expensive category, and budget consumption.
 
 ## Run the app
 
@@ -49,6 +58,16 @@ Fetch packages, then run on an Android device or emulator:
 
 The database file is created on the device. Automated tests use an in-memory database.
 
-## Status
+## Testing
 
-The project shell and the four-table database are ready. Each developer can start their feature module from Phase 3 of the development plan.
+    flutter analyze
+    flutter test
+
+## Known limitations
+
+- There is no cloud sync, no notifications, and no currency conversion. Changing the currency label does not rewrite amounts already stored.
+- The app is for one device. The email does not sign the person in.
+- Category icons come from a fixed catalogue.
+- Statistics cover six months ending on the selected month.
+- Overlapping budgets for the same category are rejected in domain code.
+- Android is the acceptance target.
