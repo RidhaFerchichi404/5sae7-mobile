@@ -8,7 +8,7 @@
 
 MyBudget is an offline Android application for personal finance. A local profile records income and expenses, organises them by category, sets a spending limit, and shows the situation on a dashboard.
 
-The application is not implemented yet. Behaviour is defined in the cahier des charges. The build order is defined in the development plan.
+The shared app shell and the SQLite foundation are in place. Feature modules are not implemented yet. Behaviour is defined in the cahier des charges. The build order is defined in the development plan.
 
 ## Documentation
 
@@ -40,6 +40,15 @@ Four developers. Each developer owns one table and the full module around it: mo
 
 Shared setup is done once, before the feature branches. Phase 0 of the development plan is the gate: nobody starts feature code before that sign-off.
 
+## Run the app
+
+Fetch packages, then run on an Android device or emulator:
+
+    flutter pub get
+    flutter run
+
+The database file is created on the device. Automated tests use an in-memory database.
+
 ## Status
 
-Specification and roadmap are in `documentation/`. Feature implementation follows that plan.
+The project shell and the four-table database are ready. Each developer can start their feature module from Phase 3 of the development plan.
