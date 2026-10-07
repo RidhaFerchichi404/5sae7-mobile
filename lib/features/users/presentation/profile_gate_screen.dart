@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_failure.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/fade_slide_in.dart';
+import '../../../shared/widgets/section_card.dart';
 import '../domain/user_profile.dart';
 import '../domain/user_validation.dart';
 import 'user_providers.dart';
@@ -54,13 +57,20 @@ class _ProfileGateScreenState extends ConsumerState<ProfileGateScreen> {
         title: const Text('MyBudget'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: AppSpacing.screen,
         children: [
-          Text(
-            'Create your profile',
-            style: Theme.of(context).textTheme.titleLarge,
+          FadeSlideIn(
+            child: Text(
+              'Create your profile',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
           ),
-          const SizedBox(height: 16),
+          AppSpacing.gap,
+          FadeSlideIn(
+            index: 1,
+            child: SectionCard(
+              child: Column(
+                children: [
           TextField(
             key: const Key('profile-name'),
             controller: _name,
@@ -69,7 +79,7 @@ class _ProfileGateScreenState extends ConsumerState<ProfileGateScreen> {
               errorText: _errors?.nameError,
             ),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gap,
           TextField(
             key: const Key('profile-email'),
             controller: _email,
@@ -78,7 +88,7 @@ class _ProfileGateScreenState extends ConsumerState<ProfileGateScreen> {
               errorText: _errors?.emailError,
             ),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gap,
           DropdownButtonFormField<String>(
             initialValue: _currency,
             decoration: InputDecoration(
@@ -96,16 +106,20 @@ class _ProfileGateScreenState extends ConsumerState<ProfileGateScreen> {
             },
           ),
           if (_formError != null) ...[
-            const SizedBox(height: 12),
+            AppSpacing.gap,
             Text(_formError!, key: const Key('profile-form-error')),
           ],
-          const SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+          AppSpacing.section,
           FilledButton(
             key: const Key('create-profile'),
             onPressed: _create,
             child: const Text('Create profile'),
           ),
-          const SizedBox(height: 24),
+          AppSpacing.section,
           users.when(
             loading: () => const SizedBox.shrink(),
             error: (error, _) => Text(error.toString()),
@@ -116,9 +130,19 @@ class _ProfileGateScreenState extends ConsumerState<ProfileGateScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Or continue'),
-                  const SizedBox(height: 8),
-                  for (final user in items) _ProfileTile(user: user),
+                  Text(
+                    'Or continue',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  AppSpacing.gap,
+                  for (var i = 0; i < items.length; i++)
+                    FadeSlideIn(
+                      index: i,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                        child: _ProfileTile(user: items[i]),
+                      ),
+                    ),
                 ],
               );
             },

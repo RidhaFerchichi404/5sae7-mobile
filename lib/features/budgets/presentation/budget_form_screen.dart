@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_failure.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/date_ranges.dart';
 import '../../../core/utils/iso_time.dart';
+import '../../../shared/widgets/section_card.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/presentation/category_picker.dart';
 import '../../users/presentation/user_providers.dart';
@@ -152,8 +154,12 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
         title: Text(widget.existing == null ? 'New budget' : 'Edit budget'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: AppSpacing.screen,
         children: [
+          SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('Expense category'),
@@ -180,7 +186,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
               errorText: _errors?.limitError,
             ),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gap,
           SegmentedButton<String>(
             segments: const [
               ButtonSegment(value: AppConstants.monthlyPeriod, label: Text('Monthly')),
@@ -189,7 +195,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
             selected: {_period},
             onSelectionChanged: (value) => setState(() => _period = value.first),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gap,
           if (_period == AppConstants.monthlyPeriod)
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -213,10 +219,13 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
           ],
           if (_errors?.dateError != null) Text(_errors!.dateError!),
           if (_formError != null) ...[
-            const SizedBox(height: 12),
+            AppSpacing.gap,
             Text(_formError!, key: const Key('budget-form-error')),
           ],
-          const SizedBox(height: 16),
+              ],
+            ),
+          ),
+          AppSpacing.section,
           FilledButton(
             key: const Key('save-budget'),
             onPressed: _save,

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../categories/presentation/category_providers.dart';
@@ -56,34 +58,41 @@ class BudgetsScreen extends ConsumerWidget {
             );
           }
           return ListView(
+            padding: AppSpacing.screen,
             children: [
-              for (final item in items)
-                BudgetProgressCard(
-                  progress: item,
-                  categoryName: names[item.budget.categoryId] ?? 'Category',
-                  currencyCode: currency,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => BudgetFormScreen(
-                          userId: userId,
-                          existing: item.budget,
+              for (var i = 0; i < items.length; i++)
+                FadeSlideIn(
+                  index: i,
+                  child: BudgetProgressCard(
+                    progress: items[i],
+                    categoryName:
+                        names[items[i].budget.categoryId] ?? 'Category',
+                    currencyCode: currency,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => BudgetFormScreen(
+                            userId: userId,
+                            existing: items[i].budget,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  onDelete: () async {
-                    final confirmed = await showConfirmDialog(
-                      context: context,
-                      title: 'Delete budget',
-                      message: 'Delete this budget? Transactions stay.',
-                    );
-                    if (!confirmed) {
-                      return;
-                    }
-                    await ref.read(budgetRepositoryProvider).delete(item.budget.id);
-                    ref.invalidate(budgetListProvider);
-                  },
+                      );
+                    },
+                    onDelete: () async {
+                      final confirmed = await showConfirmDialog(
+                        context: context,
+                        title: 'Delete budget',
+                        message: 'Delete this budget? Transactions stay.',
+                      );
+                      if (!confirmed) {
+                        return;
+                      }
+                      await ref
+                          .read(budgetRepositoryProvider)
+                          .delete(items[i].budget.id);
+                      ref.invalidate(budgetListProvider);
+                    },
+                  ),
                 ),
             ],
           );

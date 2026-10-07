@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/iso_time.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
+import '../../../shared/widgets/fade_slide_in.dart';
+import '../../../shared/widgets/section_card.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../domain/user_profile.dart';
@@ -60,18 +63,44 @@ class _ProfileBody extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: AppSpacing.screen,
         children: [
-          Text(user.name, style: Theme.of(context).textTheme.titleLarge),
-          Text(user.email),
-          const SizedBox(height: 16),
-          ListTile(title: const Text('Currency'), trailing: Text(user.currency)),
-          ListTile(
-            title: const Text('Created'),
-            trailing: Text(IsoTime.date(user.createdAt)),
+          FadeSlideIn(
+            child: SectionCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(user.name, style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(user.email, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 16),
-          FilledButton(
+          AppSpacing.section,
+          FadeSlideIn(
+            index: 1,
+            child: SectionCard(
+              padding: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  ListTile(
+                    title: const Text('Currency'),
+                    trailing: Text(user.currency),
+                  ),
+                  ListTile(
+                    title: const Text('Created'),
+                    trailing: Text(
+                      IsoTime.date(user.createdAt),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AppSpacing.section,
+          OutlinedButton(
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
@@ -81,7 +110,7 @@ class _ProfileBody extends ConsumerWidget {
             },
             child: const Text('Edit profile'),
           ),
-          const SizedBox(height: 8),
+          AppSpacing.gap,
           OutlinedButton(
             onPressed: () {
               ref.read(activeUserIdProvider.notifier).select(null);

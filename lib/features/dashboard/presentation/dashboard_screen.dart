@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/iso_time.dart';
 import '../../../core/utils/money.dart';
 import '../../../shared/widgets/amount_text.dart';
+import '../../../shared/widgets/fade_slide_in.dart';
+import '../../../shared/widgets/section_card.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../budgets/domain/budget.dart';
@@ -80,98 +82,133 @@ class _DashboardBody extends StatelessWidget {
       (max, item) => item.amount > max ? item.amount : max,
     );
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.screen,
       children: [
-        Text('Balance', style: Theme.of(context).textTheme.titleMedium),
-        AmountText(
-          key: const Key('dashboard-balance'),
-          amount: snapshot.balance,
-          currencyCode: currencyCode,
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _Figure(
-                label: 'Income',
-                amount: snapshot.monthlyIncome,
-                currencyCode: currencyCode,
-              ),
+        FadeSlideIn(
+          child: SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Balance', style: Theme.of(context).textTheme.titleMedium),
+                AmountText(
+                  key: const Key('dashboard-balance'),
+                  amount: snapshot.balance,
+                  currencyCode: currencyCode,
+                  prominent: true,
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _Figure(
-                label: 'Expenses',
-                amount: snapshot.monthlyExpenses,
-                currencyCode: currencyCode,
-                expense: true,
-              ),
-            ),
-          ],
+          ),
         ),
-        const SizedBox(height: 8),
+        AppSpacing.gap,
+        FadeSlideIn(
+          index: 1,
+          child: Row(
+            children: [
+              Expanded(
+                child: _Figure(
+                  label: 'Income',
+                  amount: snapshot.monthlyIncome,
+                  currencyCode: currencyCode,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: _Figure(
+                  label: 'Expenses',
+                  amount: snapshot.monthlyExpenses,
+                  currencyCode: currencyCode,
+                  expense: true,
+                ),
+              ),
+            ],
+          ),
+        ),
+        AppSpacing.gap,
         Text(
           'All time ${Money.format(snapshot.totalIncome, currencyCode)} in · ${Money.format(snapshot.totalExpenses, currencyCode)} out',
-          style: const TextStyle(color: AppColors.muted),
+          style: Theme.of(context).textTheme.bodySmall,
         ),
-        const SizedBox(height: 16),
-        Text('Remaining budget', style: Theme.of(context).textTheme.titleMedium),
-        Text(
-          snapshot.remainingBudget == null
-              ? 'No active budget'
-              : Money.format(snapshot.remainingBudget!, currencyCode),
-          key: const Key('dashboard-remaining'),
-        ),
-        if (snapshot.attention.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          for (final item in snapshot.attention)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(item.categoryName),
-              subtitle: Text(_stateLabel(item.progress.state)),
-              trailing: Text(Money.format(item.progress.remaining, currencyCode)),
-            ),
-        ],
-        const SizedBox(height: 8),
-        Text('This month', style: Theme.of(context).textTheme.titleMedium),
-        if (snapshot.monthlySpending.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text('No expenses this month.'),
-          )
-        else
-          for (final item in snapshot.monthlySpending)
-            AmountBar(
-              label: item.name,
-              amount: item.amount,
-              maxAmount: spendingMax,
-              currencyCode: currencyCode,
-            ),
-        const SizedBox(height: 8),
-        Text('Recent', style: Theme.of(context).textTheme.titleMedium),
-        if (snapshot.recent.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text('No transactions'),
-          )
-        else
-          for (final item in snapshot.recent)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(item.categoryName),
-              subtitle: Text(IsoTime.date(item.record.transactionDate)),
-              trailing: AmountText(
-                amount: item.record.amount,
-                currencyCode: currencyCode,
-                expense: item.record.isExpense,
-              ),
-            ),
-        const SizedBox(height: 12),
+        AppSpacing.section,
         OutlinedButton(
           key: const Key('open-statistics'),
           onPressed: onStatistics,
           child: const Text('Statistics'),
         ),
+        AppSpacing.section,
+        FadeSlideIn(
+          index: 2,
+          child: SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Remaining budget',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                AppSpacing.gap,
+                Text(
+                  snapshot.remainingBudget == null
+                      ? 'No active budget'
+                      : Money.format(snapshot.remainingBudget!, currencyCode),
+                  key: const Key('dashboard-remaining'),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                for (final item in snapshot.attention)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(item.categoryName),
+                    subtitle: Text(_stateLabel(item.progress.state)),
+                    trailing: Text(
+                      Money.format(item.progress.remaining, currencyCode),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        AppSpacing.section,
+        Text('This month', style: Theme.of(context).textTheme.titleMedium),
+        AppSpacing.gap,
+        if (snapshot.monthlySpending.isEmpty)
+          Text(
+            'No expenses this month.',
+            style: Theme.of(context).textTheme.bodySmall,
+          )
+        else
+          for (var i = 0; i < snapshot.monthlySpending.length; i++)
+            FadeSlideIn(
+              index: i,
+              child: AmountBar(
+                label: snapshot.monthlySpending[i].name,
+                amount: snapshot.monthlySpending[i].amount,
+                maxAmount: spendingMax,
+                currencyCode: currencyCode,
+              ),
+            ),
+        AppSpacing.section,
+        Text('Recent', style: Theme.of(context).textTheme.titleMedium),
+        AppSpacing.gap,
+        if (snapshot.recent.isEmpty)
+          Text('No transactions', style: Theme.of(context).textTheme.bodySmall)
+        else
+          for (var i = 0; i < snapshot.recent.length; i++)
+            FadeSlideIn(
+              index: i,
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(snapshot.recent[i].categoryName),
+                subtitle: Text(
+                  IsoTime.date(snapshot.recent[i].record.transactionDate),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                trailing: AmountText(
+                  amount: snapshot.recent[i].record.amount,
+                  currencyCode: currencyCode,
+                  expense: snapshot.recent[i].record.isExpense,
+                ),
+              ),
+            ),
       ],
     );
   }
@@ -194,7 +231,7 @@ class _Figure extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

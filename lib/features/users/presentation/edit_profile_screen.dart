@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_failure.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/iso_time.dart';
+import '../../../shared/widgets/section_card.dart';
 import '../domain/user_profile.dart';
 import '../domain/user_validation.dart';
 import 'user_providers.dart';
@@ -66,8 +68,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Edit profile')),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: AppSpacing.screen,
         children: [
+          SectionCard(
+            child: Column(
+              children: [
           TextField(
             controller: _name,
             decoration: InputDecoration(
@@ -75,7 +80,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               errorText: _errors?.nameError,
             ),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gap,
           TextField(
             controller: _email,
             decoration: InputDecoration(
@@ -83,7 +88,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               errorText: _errors?.emailError,
             ),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gap,
           DropdownButtonFormField<String>(
             initialValue: _currency,
             decoration: InputDecoration(
@@ -101,12 +106,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             },
           ),
           if (_formError != null) ...[
-            const SizedBox(height: 12),
+            AppSpacing.gap,
             Text(_formError!),
           ],
-          const SizedBox(height: 16),
+              ],
+            ),
+          ),
+          AppSpacing.section,
           FilledButton(onPressed: _save, child: const Text('Save')),
-          const SizedBox(height: 8),
+          AppSpacing.gap,
           Text(
             'Created ${IsoTime.date(widget.user.createdAt)}',
             style: Theme.of(context).textTheme.bodySmall,

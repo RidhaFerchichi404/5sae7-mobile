@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/iso_time.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../categories/domain/category.dart';
@@ -85,7 +87,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.sm,
+              AppSpacing.xs,
+              AppSpacing.sm,
+              0,
+            ),
             child: TextField(
               controller: _search,
               decoration: const InputDecoration(
@@ -97,7 +104,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
             child: Row(
               children: [
                 FilterChip(
@@ -190,30 +200,45 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     category.id: category.name,
                 };
                 return ListView(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.sm,
+                    0,
+                    AppSpacing.sm,
+                    88,
+                  ),
                   children: [
-                    for (final item in rows)
-                      ListTile(
-                        title: Text(names[item.categoryId] ?? item.type),
-                        subtitle: Text(
-                          '${IsoTime.date(item.transactionDate)}'
-                          '${item.description == null ? '' : ' · ${item.description}'}',
-                        ),
-                        trailing: AmountText(
-                          amount: item.amount,
-                          currencyCode: currency,
-                          expense: item.isExpense,
-                        ),
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => TransactionFormScreen(
-                                userId: widget.userId,
-                                existing: item,
+                    for (var i = 0; i < rows.length; i++)
+                      FadeSlideIn(
+                        index: i,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                          child: Card(
+                            child: ListTile(
+                              title: Text(names[rows[i].categoryId] ?? rows[i].type),
+                              subtitle: Text(
+                                '${IsoTime.date(rows[i].transactionDate)}'
+                                '${rows[i].description == null ? '' : ' · ${rows[i].description}'}',
+                                style: Theme.of(context).textTheme.bodySmall,
                               ),
+                              trailing: AmountText(
+                                amount: rows[i].amount,
+                                currencyCode: currency,
+                                expense: rows[i].isExpense,
+                              ),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => TransactionFormScreen(
+                                      userId: widget.userId,
+                                      existing: rows[i],
+                                    ),
+                                  ),
+                                );
+                              },
+                              onLongPress: () => _delete(rows[i]),
                             ),
-                          );
-                        },
-                        onLongPress: () => _delete(item),
+                          ),
+                        ),
                       ),
                   ],
                 );

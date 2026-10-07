@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/iso_time.dart';
+import '../../../shared/widgets/section_card.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/presentation/category_picker.dart';
 import '../../users/presentation/user_providers.dart';
@@ -140,8 +142,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         title: Text(widget.existing == null ? 'New transaction' : 'Edit transaction'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: AppSpacing.screen,
         children: [
+          SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
           SegmentedButton<String>(
             segments: const [
               ButtonSegment(
@@ -158,7 +164,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               });
             },
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gap,
           TextField(
             key: const Key('transaction-amount'),
             controller: _amount,
@@ -169,7 +175,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               errorText: _errors?.amountError,
             ),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gap,
           ListTile(
             key: const Key('transaction-category'),
             contentPadding: EdgeInsets.zero,
@@ -199,10 +205,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             ),
           ),
           if (_formError != null) ...[
-            const SizedBox(height: 12),
+            AppSpacing.gap,
             Text(_formError!),
           ],
-          const SizedBox(height: 16),
+              ],
+            ),
+          ),
+          AppSpacing.section,
           FilledButton(
             key: const Key('save-transaction'),
             onPressed: _save,

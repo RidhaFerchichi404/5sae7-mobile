@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../domain/category.dart';
 import 'category_icons.dart';
@@ -30,12 +32,21 @@ class CategoryPickerPage extends ConsumerWidget {
             );
           }
           return ListView(
+            padding: AppSpacing.screen,
             children: [
-              for (final category in items)
-                ListTile(
-                  leading: Icon(iconForKey(category.icon)),
-                  title: Text(category.name),
-                  onTap: () => Navigator.of(context).pop(category),
+              for (var i = 0; i < items.length; i++)
+                FadeSlideIn(
+                  index: i,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                    child: Card(
+                      child: ListTile(
+                        leading: Icon(iconForKey(items[i].icon)),
+                        title: Text(items[i].name),
+                        onTap: () => Navigator.of(context).pop(items[i]),
+                      ),
+                    ),
+                  ),
                 ),
             ],
           );

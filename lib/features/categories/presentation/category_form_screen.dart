@@ -4,11 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/fade_slide_in.dart';
+import '../../../shared/widgets/section_card.dart';
+import '../../users/presentation/user_providers.dart';
 import '../domain/category.dart';
 import '../domain/category_validation.dart';
 import 'category_icons.dart';
 import 'category_providers.dart';
-import '../../users/presentation/user_providers.dart';
 
 class CategoryFormScreen extends ConsumerStatefulWidget {
   const CategoryFormScreen({super.key, this.existing});
@@ -80,8 +83,12 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         title: Text(widget.existing == null ? 'New category' : 'Edit category'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: AppSpacing.screen,
         children: [
+          SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
           TextField(
             key: const Key('category-name'),
             controller: _name,
@@ -90,7 +97,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
               errorText: _errors?.nameError,
             ),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gap,
           SegmentedButton<String>(
             segments: const [
               ButtonSegment(
@@ -110,10 +117,12 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
               padding: const EdgeInsets.only(top: 8),
               child: Text(_errors!.typeError!),
             ),
-          const SizedBox(height: 16),
-          const Text('Icon'),
-          const SizedBox(height: 8),
-          Wrap(
+          AppSpacing.section,
+          Text('Icon', style: Theme.of(context).textTheme.titleMedium),
+          AppSpacing.gap,
+          FadeSlideIn(
+            index: 2,
+            child: Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
@@ -130,12 +139,16 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                 ),
             ],
           ),
+          ),
           if (_errors?.iconError != null) Text(_errors!.iconError!),
           if (_formError != null) ...[
-            const SizedBox(height: 12),
+            AppSpacing.gap,
             Text(_formError!, key: const Key('category-form-error')),
           ],
-          const SizedBox(height: 16),
+              ],
+            ),
+          ),
+          AppSpacing.section,
           FilledButton(
             key: const Key('save-category'),
             onPressed: _save,

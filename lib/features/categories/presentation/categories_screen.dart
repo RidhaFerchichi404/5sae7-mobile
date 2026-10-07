@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_failure.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_view.dart';
+import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../users/presentation/user_providers.dart';
 import '../domain/category.dart';
@@ -70,7 +72,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(message, key: const Key('category-restrict')),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.xs),
                 Flexible(
                   child: ListView(
                     shrinkWrap: true,
@@ -122,7 +124,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.screen,
             child: SegmentedButton<String>(
               segments: const [
                 ButtonSegment(
@@ -150,27 +152,45 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   );
                 }
                 return ListView(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.sm,
+                    0,
+                    AppSpacing.sm,
+                    88,
+                  ),
                   children: [
-                    for (final category in items)
-                      ListTile(
-                        leading: Icon(iconForKey(category.icon)),
-                        title: Text(category.name),
-                        subtitle: Text(
-                          isPredefinedCategory(category) ? 'Predefined' : 'Custom',
-                        ),
-                        trailing: IconButton(
-                          key: Key('delete-category-${category.id}'),
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => _delete(category),
-                        ),
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) =>
-                                  CategoryFormScreen(existing: category),
+                    for (var i = 0; i < items.length; i++)
+                      FadeSlideIn(
+                        index: i,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                          child: Card(
+                            child: ListTile(
+                              leading: Icon(iconForKey(items[i].icon)),
+                              title: Text(items[i].name),
+                              subtitle: Text(
+                                isPredefinedCategory(items[i])
+                                    ? 'Predefined'
+                                    : 'Custom',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              trailing: IconButton(
+                                key: Key('delete-category-${items[i].id}'),
+                                tooltip: 'Delete category',
+                                icon: const Icon(Icons.delete_outline),
+                                onPressed: () => _delete(items[i]),
+                              ),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        CategoryFormScreen(existing: items[i]),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
+                          ),
+                        ),
                       ),
                   ],
                 );

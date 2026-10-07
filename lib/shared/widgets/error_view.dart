@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
 
 class ErrorView extends StatelessWidget {
   const ErrorView({super.key, required this.message, this.onRetry});
@@ -12,15 +13,15 @@ class ErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.error_outline, color: AppColors.exceeded),
-            const SizedBox(height: 12),
+            AppSpacing.gap,
             Text(message, textAlign: TextAlign.center),
             if (onRetry != null) ...[
-              const SizedBox(height: 16),
+              AppSpacing.gap,
               FilledButton(onPressed: onRetry, child: const Text('Try again')),
             ],
           ],

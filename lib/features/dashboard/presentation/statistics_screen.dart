@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/money.dart';
 import '../../../shared/widgets/error_view.dart';
+import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../budgets/domain/budget.dart';
 import '../../users/domain/user_profile.dart';
@@ -94,24 +96,29 @@ class _StatisticsBody extends StatelessWidget {
       return peak > max ? peak : max;
     });
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.md),
       children: [
         Text('Income versus expenses', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        AmountBar(
+        AppSpacing.gap,
+        FadeSlideIn(
+          child: AmountBar(
           label: 'Income',
           amount: snapshot.income,
           maxAmount: _peak(snapshot.income, snapshot.expenses),
           currencyCode: currencyCode,
           color: AppColors.income,
         ),
-        AmountBar(
-          label: 'Expenses',
-          amount: snapshot.expenses,
-          maxAmount: _peak(snapshot.income, snapshot.expenses),
-          currencyCode: currencyCode,
         ),
-        const SizedBox(height: 16),
+        FadeSlideIn(
+          index: 1,
+          child: AmountBar(
+            label: 'Expenses',
+            amount: snapshot.expenses,
+            maxAmount: _peak(snapshot.income, snapshot.expenses),
+            currencyCode: currencyCode,
+          ),
+        ),
+        AppSpacing.section,
         Text('Most expensive', style: Theme.of(context).textTheme.titleMedium),
         Text(
           snapshot.mostExpensive == null
@@ -119,7 +126,7 @@ class _StatisticsBody extends StatelessWidget {
               : '${snapshot.mostExpensive!.name} · ${Money.format(snapshot.mostExpensive!.amount, currencyCode)}',
           key: const Key('most-expensive'),
         ),
-        const SizedBox(height: 16),
+        AppSpacing.section,
         Text('Expenses by category', style: Theme.of(context).textTheme.titleMedium),
         if (snapshot.expensesByCategory.isEmpty)
           const Padding(
@@ -134,7 +141,7 @@ class _StatisticsBody extends StatelessWidget {
               maxAmount: categoryMax,
               currencyCode: currencyCode,
             ),
-        const SizedBox(height: 16),
+        AppSpacing.section,
         Text('Spending evolution', style: Theme.of(context).textTheme.titleMedium),
         for (final point in snapshot.series)
           AmountBar(
@@ -143,7 +150,7 @@ class _StatisticsBody extends StatelessWidget {
             maxAmount: seriesMax,
             currencyCode: currencyCode,
           ),
-        const SizedBox(height: 16),
+        AppSpacing.section,
         Text('Budget consumption', style: Theme.of(context).textTheme.titleMedium),
         if (snapshot.budgetConsumption.isEmpty)
           const Padding(
