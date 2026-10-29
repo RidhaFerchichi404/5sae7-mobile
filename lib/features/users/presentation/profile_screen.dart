@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/theme_mode_provider.dart';
 import '../../../core/utils/iso_time.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
@@ -70,9 +71,15 @@ class _ProfileBody extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user.name, style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    user.name,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: AppSpacing.xs),
-                  Text(user.email, style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    user.email,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ],
               ),
             ),
@@ -94,6 +101,14 @@ class _ProfileBody extends ConsumerWidget {
                       IsoTime.date(user.createdAt),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
+                  ),
+                  SwitchListTile(
+                    key: const Key('dark-theme'),
+                    title: const Text('Dark theme'),
+                    value: ref.watch(themeModeProvider) == ThemeMode.dark,
+                    onChanged: (dark) => ref
+                        .read(themeModeProvider.notifier)
+                        .select(dark ? ThemeMode.dark : ThemeMode.light),
                   ),
                 ],
               ),
@@ -121,9 +136,9 @@ class _ProfileBody extends ConsumerWidget {
           TextButton(
             key: const Key('delete-profile'),
             onPressed: () => _delete(context, ref),
-            child: const Text(
+            child: Text(
               'Delete profile',
-              style: TextStyle(color: AppColors.exceeded),
+              style: TextStyle(color: AppColors.of(context).exceeded),
             ),
           ),
         ],

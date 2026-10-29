@@ -177,9 +177,9 @@ void main() {
           body: ListView(
             children: [
               for (final entry in [
-                (spent: 10.0, label: 'Normal', color: AppColors.primary),
-                (spent: 80.0, label: 'Warning', color: AppColors.warning),
-                (spent: 140.0, label: 'Exceeded', color: AppColors.exceeded),
+                (spent: 10.0, label: 'Normal', color: AppColors.light.primary),
+                (spent: 80.0, label: 'Warning', color: AppColors.light.warning),
+                (spent: 140.0, label: 'Exceeded', color: AppColors.light.exceeded),
               ])
                 BudgetProgressCard(
                   progress: BudgetCalculator.progress(
@@ -197,9 +197,9 @@ void main() {
     await tester.pump();
 
     for (final entry in [
-      (label: 'Normal', color: AppColors.primary),
-      (label: 'Warning', color: AppColors.warning),
-      (label: 'Exceeded', color: AppColors.exceeded),
+      (label: 'Normal', color: AppColors.light.primary),
+      (label: 'Warning', color: AppColors.light.warning),
+      (label: 'Exceeded', color: AppColors.light.exceeded),
     ]) {
       final text = tester.widget<Text>(find.text(entry.label));
       expect(text.style?.color, entry.color);

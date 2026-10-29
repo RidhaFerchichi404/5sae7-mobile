@@ -132,10 +132,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   onPressed: () => setState(() => _icon = key),
                   style: IconButton.styleFrom(
                     backgroundColor: _icon == key
-                        ? AppColors.primary.withValues(alpha: 0.15)
+                        ? AppColors.of(context).secondary
                         : null,
                   ),
-                  icon: Icon(iconForKey(key), color: AppColors.primary),
+                  icon: Icon(iconForKey(key), color: AppColors.of(context).ink),
                 ),
             ],
           ),

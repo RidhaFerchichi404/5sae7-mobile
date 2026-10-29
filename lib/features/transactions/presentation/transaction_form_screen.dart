@@ -183,7 +183,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             subtitle: Text(
               _category?.name ?? 'Choose a category',
               style: TextStyle(
-                color: _errors?.categoryError == null ? null : AppColors.exceeded,
+                color: _errors?.categoryError == null ? null : AppColors.of(context).exceeded,
               ),
             ),
             trailing: const Icon(Icons.chevron_right),

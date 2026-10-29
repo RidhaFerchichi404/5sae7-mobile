@@ -20,7 +20,9 @@ class AmountText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formatted = Money.format(amount, currencyCode);
-    final color = expense ? AppColors.expense : AppColors.income;
+    final color = expense
+        ? AppColors.of(context).expense
+        : AppColors.of(context).income;
     final base = prominent
         ? Theme.of(context).textTheme.headlineMedium
         : Theme.of(context).textTheme.titleMedium;

@@ -24,7 +24,7 @@ Future<bool> showConfirmDialog({
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(
               confirmLabel,
-              style: const TextStyle(color: AppColors.exceeded),
+              style: TextStyle(color: AppColors.of(context).exceeded),
             ),
           ),
         ],

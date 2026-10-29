@@ -106,7 +106,7 @@ class _StatisticsBody extends StatelessWidget {
           amount: snapshot.income,
           maxAmount: _peak(snapshot.income, snapshot.expenses),
           currencyCode: currencyCode,
-          color: AppColors.income,
+          color: AppColors.of(context).income,
         ),
         ),
         FadeSlideIn(

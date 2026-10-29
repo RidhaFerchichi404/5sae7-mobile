@@ -12,17 +12,18 @@ class AmountBar extends StatelessWidget {
     required this.amount,
     required this.maxAmount,
     required this.currencyCode,
-    this.color = AppColors.expense,
+    this.color,
   });
 
   final String label;
   final double amount;
   final double maxAmount;
   final String currencyCode;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
+    final color = this.color ?? AppColors.of(context).expense;
     final fraction = maxAmount <= 0 ? 0.0 : (amount / maxAmount).clamp(0.0, 1.0);
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xs),

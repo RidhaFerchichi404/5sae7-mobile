@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Short motion shared by pages, tabs, and entrance effects.
 abstract final class AppMotion {
-  static const duration = Duration(milliseconds: 280);
+  static const duration = Duration(milliseconds: 150);
   static const curve = Curves.easeOutCubic;
 }
 

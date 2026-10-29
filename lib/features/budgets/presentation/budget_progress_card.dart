@@ -24,10 +24,11 @@ class BudgetProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final color = switch (progress.state) {
-      BudgetState.normal => AppColors.primary,
-      BudgetState.warning => AppColors.warning,
-      BudgetState.exceeded => AppColors.exceeded,
+      BudgetState.normal => colors.primary,
+      BudgetState.warning => colors.warning,
+      BudgetState.exceeded => colors.exceeded,
     };
     final label = switch (progress.state) {
       BudgetState.normal => 'Normal',

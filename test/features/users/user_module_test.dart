@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mybudget/core/database/app_database.dart';
 import 'package:mybudget/core/database/database_provider.dart';
 import 'package:mybudget/core/errors/app_failure.dart';
+import 'package:mybudget/core/theme/theme_mode_provider.dart';
 import 'package:mybudget/features/budgets/data/budget_repository.dart';
 import 'package:mybudget/features/budgets/domain/budget_validation.dart';
 import 'package:mybudget/features/categories/data/category_repository.dart';
@@ -72,56 +75,67 @@ void main() {
     );
   });
 
-  test('deleting a profile cascades categories, transactions, and budgets', () async {
-    final user = await users.create(
-      validateUserInput(
-        const UserInput(name: 'Amira', email: 'amira@email.com', currency: 'TND'),
-      ),
-    );
-    final categories = CategoryRepository(database);
-    final transactions = TransactionRepository(database, categories);
-    final budgets = BudgetRepository(database, categories, transactions);
-    final category = await categories.create(
-      userId: user.id,
-      input: validateCategoryInput(
-        const CategoryInput(name: 'Food', type: 'EXPENSE', icon: 'restaurant'),
-      ),
-    );
-    await transactions.create(
-      userId: user.id,
-      input: validateTransactionInput(
-        TransactionInput(
-          amountText: '12.500',
-          currencyCode: 'TND',
-          type: 'EXPENSE',
-          category: category,
-          userId: user.id,
-          dateText: '2026-03-01',
-          description: 'Lunch',
+  test(
+    'deleting a profile cascades categories, transactions, and budgets',
+    () async {
+      final user = await users.create(
+        validateUserInput(
+          const UserInput(
+            name: 'Amira',
+            email: 'amira@email.com',
+            currency: 'TND',
+          ),
         ),
-      ),
-    );
-    await budgets.create(
-      userId: user.id,
-      input: validateBudgetInput(
-        BudgetInput(
-          limitText: '100',
-          currencyCode: 'TND',
-          period: 'MONTHLY',
-          startText: '2026-03-01',
-          endText: '2026-03-31',
-          category: category,
-          userId: user.id,
+      );
+      final categories = CategoryRepository(database);
+      final transactions = TransactionRepository(database, categories);
+      final budgets = BudgetRepository(database, categories, transactions);
+      final category = await categories.create(
+        userId: user.id,
+        input: validateCategoryInput(
+          const CategoryInput(
+            name: 'Food',
+            type: 'EXPENSE',
+            icon: 'restaurant',
+          ),
         ),
-      ),
-    );
+      );
+      await transactions.create(
+        userId: user.id,
+        input: validateTransactionInput(
+          TransactionInput(
+            amountText: '12.500',
+            currencyCode: 'TND',
+            type: 'EXPENSE',
+            category: category,
+            userId: user.id,
+            dateText: '2026-03-01',
+            description: 'Lunch',
+          ),
+        ),
+      );
+      await budgets.create(
+        userId: user.id,
+        input: validateBudgetInput(
+          BudgetInput(
+            limitText: '100',
+            currencyCode: 'TND',
+            period: 'MONTHLY',
+            startText: '2026-03-01',
+            endText: '2026-03-31',
+            category: category,
+            userId: user.id,
+          ),
+        ),
+      );
 
-    await users.delete(user.id);
+      await users.delete(user.id);
 
-    expect(await users.list(), isEmpty);
-    expect(await categories.list(userId: user.id), isEmpty);
-    expect(await budgets.list(user.id), isEmpty);
-  });
+      expect(await users.list(), isEmpty);
+      expect(await categories.list(userId: user.id), isEmpty);
+      expect(await budgets.list(user.id), isEmpty);
+    },
+  );
 
   testWidgets('create form shows a validation error', (tester) async {
     await tester.pumpWidget(
@@ -136,7 +150,10 @@ void main() {
     await tester.tap(find.byKey(const Key('create-profile')));
     await tester.pump();
 
-    expect(find.text('Enter a name between 1 and 80 characters.'), findsOneWidget);
+    expect(
+      find.text('Enter a name between 1 and 80 characters.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('delete confirmation names the profile', (tester) async {
@@ -160,5 +177,52 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await pumpFrames(tester);
     expect(await users.list(), hasLength(1));
+  });
+
+  test('a saved light theme is restored and a new choice is saved', () async {
+    final dir = await Directory.systemTemp.createTemp('theme');
+    final file = File('${dir.path}/theme_mode.txt')..writeAsStringSync('light');
+    final container = ProviderContainer(
+      overrides: [themeFileProvider.overrideWith((ref) async => file)],
+    );
+    addTearDown(() {
+      container.dispose();
+      dir.deleteSync(recursive: true);
+    });
+
+    expect(container.read(themeModeProvider), ThemeMode.dark);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(container.read(themeModeProvider), ThemeMode.light);
+
+    await container.read(themeModeProvider.notifier).select(ThemeMode.dark);
+    expect(container.read(themeModeProvider), ThemeMode.dark);
+    expect(file.readAsStringSync(), 'dark');
+  });
+
+  testWidgets('the profile switch turns the dark theme off', (tester) async {
+    final user = await users.create(
+      validateUserInput(
+        const UserInput(name: 'Amira', email: 'amira@email.com'),
+      ),
+    );
+    final file = File('${Directory.systemTemp.path}/mybudget_theme_test.txt');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWith((ref) => database),
+          themeFileProvider.overrideWith((ref) async => file),
+        ],
+        child: MaterialApp(home: ProfileScreen(userId: user.id)),
+      ),
+    );
+    await pumpFrames(tester);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ProfileScreen)),
+    );
+    expect(container.read(themeModeProvider), ThemeMode.dark);
+    await tester.tap(find.byKey(const Key('dark-theme')));
+    await pumpFrames(tester);
+    expect(container.read(themeModeProvider), ThemeMode.light);
   });
 }

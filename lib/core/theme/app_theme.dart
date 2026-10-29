@@ -4,36 +4,63 @@ import 'app_colors.dart';
 import 'app_motion.dart';
 
 abstract final class AppTheme {
-  static ThemeData get light {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      primary: AppColors.primary,
-      surface: AppColors.card,
+  static ThemeData get light => _build(AppColors.light, Brightness.light);
+  static ThemeData get dark => _build(AppColors.dark, Brightness.dark);
+
+  static ThemeData _build(AppColors c, Brightness brightness) {
+    final colorScheme = ColorScheme(
+      brightness: brightness,
+      primary: c.primary,
+      onPrimary: c.onPrimary,
+      secondary: c.secondary,
+      onSecondary: c.ink,
+      error: c.exceeded,
+      onError: c.onPrimary,
+      surface: c.card,
+      onSurface: c.ink,
+      onSurfaceVariant: c.muted,
+      surfaceContainerHighest: c.secondary,
+      outline: c.border,
+      outlineVariant: c.border,
     );
+    const radiusLg = BorderRadius.all(Radius.circular(8));
+    const radiusXl = BorderRadius.all(Radius.circular(12));
 
     return ThemeData(
       useMaterial3: true,
+      brightness: brightness,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: AppColors.canvas,
-      textTheme: const TextTheme(
+      fontFamily: 'Geist',
+      extensions: [c],
+      scaffoldBackgroundColor: c.canvas,
+      canvasColor: c.popover, // dropdown menus
+      dividerColor: c.border,
+      dividerTheme: DividerThemeData(color: c.border, thickness: 1),
+      // Headings semibold with -0.025em tracking; body 14px.
+      textTheme: TextTheme(
         headlineMedium: TextStyle(
-          color: AppColors.ink,
-          fontWeight: FontWeight.w700,
-          fontSize: 32,
+          color: c.ink,
+          fontWeight: FontWeight.w600,
+          fontSize: 30,
           height: 1.2,
+          letterSpacing: -0.75,
         ),
         titleLarge: TextStyle(
-          color: AppColors.ink,
-          fontWeight: FontWeight.w700,
+          color: c.ink,
+          fontWeight: FontWeight.w600,
+          fontSize: 22,
+          letterSpacing: -0.55,
         ),
         titleMedium: TextStyle(
-          color: AppColors.ink,
-          fontWeight: FontWeight.w600,
+          color: c.ink,
+          fontWeight: FontWeight.w500,
           fontSize: 16,
+          height: 1.375,
         ),
-        bodyLarge: TextStyle(color: AppColors.ink),
-        bodyMedium: TextStyle(color: AppColors.ink),
-        bodySmall: TextStyle(color: AppColors.muted),
+        labelLarge: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+        bodyLarge: TextStyle(color: c.ink, fontSize: 15),
+        bodyMedium: TextStyle(color: c.ink, fontSize: 14, height: 1.43),
+        bodySmall: TextStyle(color: c.muted, fontSize: 12, height: 1.33),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
@@ -45,79 +72,157 @@ abstract final class AppTheme {
           TargetPlatform.fuchsia: FadeRisePageTransitionsBuilder(),
         },
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.canvas,
-        foregroundColor: AppColors.ink,
+      appBarTheme: AppBarTheme(
+        backgroundColor: c.canvas,
+        foregroundColor: c.ink,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: false,
+        shape: Border(bottom: BorderSide(color: c.border)),
+        titleTextStyle: TextStyle(
+          fontFamily: 'Geist',
+          color: c.ink,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.45,
+        ),
       ),
-      cardTheme: const CardThemeData(
-        color: AppColors.card,
+      // Borders, not shadows: cards are a hairline on card.
+      cardTheme: CardThemeData(
+        color: c.card,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-          side: BorderSide(color: Color(0xFFD5DED8)),
+          borderRadius: radiusXl,
+          side: BorderSide(color: c.border),
         ),
       ),
-      dialogTheme: const DialogThemeData(
-        backgroundColor: AppColors.card,
+      listTileTheme: ListTileThemeData(
+        iconColor: c.muted,
+        shape: const RoundedRectangleBorder(borderRadius: radiusXl),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: c.popover,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
+          borderRadius: radiusXl,
+          side: BorderSide(color: c.border),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: c.popover,
+        contentTextStyle: TextStyle(fontFamily: 'Geist', color: c.ink),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: radiusLg,
+          side: BorderSide(color: c.border),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.card,
-        labelStyle: const TextStyle(color: AppColors.ink),
+        fillColor: brightness == Brightness.dark
+            ? c.secondary.withValues(alpha: 0.3)
+            : c.card,
+        labelStyle: TextStyle(color: c.muted),
+        hintStyle: TextStyle(color: c.muted),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.muted),
+          borderRadius: radiusLg,
+          borderSide: BorderSide(color: c.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFD5DED8)),
+          borderRadius: radiusLg,
+          borderSide: BorderSide(color: c.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderRadius: radiusLg,
+          borderSide: BorderSide(color: c.muted, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: radiusLg,
+          borderSide: BorderSide(color: c.exceeded),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: radiusLg,
+          borderSide: BorderSide(color: c.exceeded, width: 1.5),
         ),
       ),
+      // 48px tall for touch, though the web system uses 32px.
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: c.ink,
+          side: BorderSide(color: c.border),
           minimumSize: const Size.fromHeight(48),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: const RoundedRectangleBorder(borderRadius: radiusLg),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: c.primary,
+          foregroundColor: c.onPrimary,
           minimumSize: const Size.fromHeight(48),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: const RoundedRectangleBorder(borderRadius: radiusLg),
         ),
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: c.ink,
+          shape: const RoundedRectangleBorder(borderRadius: radiusLg),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: c.primary,
+        foregroundColor: c.onPrimary,
+        elevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        highlightElevation: 0,
+        shape: const RoundedRectangleBorder(borderRadius: radiusXl),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: SegmentedButton.styleFrom(
+          selectedBackgroundColor: c.secondary,
+          selectedForegroundColor: c.ink,
+          foregroundColor: c.muted,
+          side: BorderSide(color: c.border),
+          shape: const RoundedRectangleBorder(borderRadius: radiusLg),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: c.card,
+        selectedColor: c.secondary,
+        side: BorderSide(color: c.border),
+        shape: const StadiumBorder(),
+      ),
+      // Off state in muted so the control keeps 3:1 against card.
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.onPrimary : c.muted,
+        ),
+        trackOutlineColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.primary : c.muted,
+        ),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: c.primary),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: AppColors.card,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.15),
+        backgroundColor: c.card,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        indicatorColor: c.secondary,
+        indicatorShape: const RoundedRectangleBorder(borderRadius: radiusLg),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return TextStyle(
-            color: selected ? AppColors.primary : AppColors.muted,
+            fontFamily: 'Geist',
+            color: selected ? c.ink : c.muted,
             fontSize: 12,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+            fontWeight: FontWeight.w500,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
-          return IconThemeData(
-            color: selected ? AppColors.primary : AppColors.muted,
-          );
+          return IconThemeData(color: selected ? c.ink : c.muted);
         }),
       ),
     );
