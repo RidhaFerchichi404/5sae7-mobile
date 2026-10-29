@@ -147,11 +147,7 @@ class CategoryRepository {
 
   Future<Category> getById(int id) async {
     final db = await _database.open();
-    final rows = await db.query(
-      'categories',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    final rows = await db.query('categories', where: 'id = ?', whereArgs: [id]);
     if (rows.isEmpty) {
       throw const NotFoundFailure('This category no longer exists.');
     }

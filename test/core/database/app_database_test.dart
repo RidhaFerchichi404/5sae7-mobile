@@ -52,7 +52,10 @@ void main() {
   test('a transaction cannot reference a missing category', () async {
     final userId = await _insertUser(db);
     expect(
-      () => db.insert('transactions', _transaction(userId: userId, categoryId: 999)),
+      () => db.insert(
+        'transactions',
+        _transaction(userId: userId, categoryId: 999),
+      ),
       throwsA(isA<DatabaseException>()),
     );
   });
@@ -65,21 +68,30 @@ void main() {
     );
   });
 
-  test('deleting a user removes categories, transactions, and budgets', () async {
-    final userId = await _insertUser(db);
-    final categoryId = await db.insert('categories', _category(userId: userId));
-    await db.insert(
-      'transactions',
-      _transaction(userId: userId, categoryId: categoryId),
-    );
-    await db.insert('budgets', _budget(userId: userId, categoryId: categoryId));
+  test(
+    'deleting a user removes categories, transactions, and budgets',
+    () async {
+      final userId = await _insertUser(db);
+      final categoryId = await db.insert(
+        'categories',
+        _category(userId: userId),
+      );
+      await db.insert(
+        'transactions',
+        _transaction(userId: userId, categoryId: categoryId),
+      );
+      await db.insert(
+        'budgets',
+        _budget(userId: userId, categoryId: categoryId),
+      );
 
-    await db.delete('users', where: 'id = ?', whereArgs: [userId]);
+      await db.delete('users', where: 'id = ?', whereArgs: [userId]);
 
-    expect(await _count(db, 'categories'), 0);
-    expect(await _count(db, 'transactions'), 0);
-    expect(await _count(db, 'budgets'), 0);
-  });
+      expect(await _count(db, 'categories'), 0);
+      expect(await _count(db, 'transactions'), 0);
+      expect(await _count(db, 'budgets'), 0);
+    },
+  );
 
   test('deleting a referenced category fails', () async {
     final userId = await _insertUser(db);
@@ -121,7 +133,11 @@ void main() {
     );
     await db.insert('budgets', _budget(userId: userId, categoryId: categoryId));
 
-    await db.delete('transactions', where: 'id = ?', whereArgs: [transactionId]);
+    await db.delete(
+      'transactions',
+      where: 'id = ?',
+      whereArgs: [transactionId],
+    );
 
     expect(await _count(db, 'categories'), 1);
     expect(await _count(db, 'budgets'), 1);
@@ -167,10 +183,7 @@ Future<int> _insertUser(Database db) {
   });
 }
 
-Map<String, Object> _category({
-  required int userId,
-  String name = 'Food',
-}) {
+Map<String, Object> _category({required int userId, String name = 'Food'}) {
   return {
     'user_id': userId,
     'name': name,

@@ -143,9 +143,7 @@ class DashboardReader {
 
   Future<Map<int, String>> _names(int userId) async {
     final categories = await _categories.list(userId: userId);
-    return {
-      for (final category in categories) category.id: category.name,
-    };
+    return {for (final category in categories) category.id: category.name};
   }
 
   List<CategoryTotal> _totals(Map<int, double> sums, Map<int, String> names) {

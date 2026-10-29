@@ -53,9 +53,7 @@ class _ProfileGateScreenState extends ConsumerState<ProfileGateScreen> {
   Widget build(BuildContext context) {
     final users = ref.watch(userListProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('MyBudget'),
-      ),
+      appBar: AppBar(title: const Text('MyBudget')),
       body: ListView(
         padding: AppSpacing.screen,
         children: [
@@ -71,44 +69,44 @@ class _ProfileGateScreenState extends ConsumerState<ProfileGateScreen> {
             child: SectionCard(
               child: Column(
                 children: [
-          TextField(
-            key: const Key('profile-name'),
-            controller: _name,
-            decoration: InputDecoration(
-              labelText: 'Name',
-              errorText: _errors?.nameError,
-            ),
-          ),
-          AppSpacing.gap,
-          TextField(
-            key: const Key('profile-email'),
-            controller: _email,
-            decoration: InputDecoration(
-              labelText: 'Email',
-              errorText: _errors?.emailError,
-            ),
-          ),
-          AppSpacing.gap,
-          DropdownButtonFormField<String>(
-            initialValue: _currency,
-            decoration: InputDecoration(
-              labelText: 'Currency',
-              errorText: _errors?.currencyError,
-            ),
-            items: [
-              for (final code in AppConstants.currencies)
-                DropdownMenuItem(value: code, child: Text(code)),
-            ],
-            onChanged: (value) {
-              if (value != null) {
-                setState(() => _currency = value);
-              }
-            },
-          ),
-          if (_formError != null) ...[
-            AppSpacing.gap,
-            Text(_formError!, key: const Key('profile-form-error')),
-          ],
+                  TextField(
+                    key: const Key('profile-name'),
+                    controller: _name,
+                    decoration: InputDecoration(
+                      labelText: 'Name',
+                      errorText: _errors?.nameError,
+                    ),
+                  ),
+                  AppSpacing.gap,
+                  TextField(
+                    key: const Key('profile-email'),
+                    controller: _email,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      errorText: _errors?.emailError,
+                    ),
+                  ),
+                  AppSpacing.gap,
+                  DropdownButtonFormField<String>(
+                    initialValue: _currency,
+                    decoration: InputDecoration(
+                      labelText: 'Currency',
+                      errorText: _errors?.currencyError,
+                    ),
+                    items: [
+                      for (final code in AppConstants.currencies)
+                        DropdownMenuItem(value: code, child: Text(code)),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _currency = value);
+                      }
+                    },
+                  ),
+                  if (_formError != null) ...[
+                    AppSpacing.gap,
+                    Text(_formError!, key: const Key('profile-form-error')),
+                  ],
                 ],
               ),
             ),

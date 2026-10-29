@@ -45,20 +45,32 @@ void main() {
     await database.close();
   });
 
-  test('calculator marks 0 and 79 as normal, 80 and 100 as warning, above 100 as exceeded', () {
-    final budget = _budget(100);
-    expect(BudgetCalculator.progress(budget: budget, spent: 0).state, BudgetState.normal);
-    expect(BudgetCalculator.progress(budget: budget, spent: 79).state, BudgetState.normal);
-    expect(BudgetCalculator.progress(budget: budget, spent: 80).state, BudgetState.warning);
-    expect(
-      BudgetCalculator.progress(budget: budget, spent: 100).state,
-      BudgetState.warning,
-    );
-    final over = BudgetCalculator.progress(budget: budget, spent: 130);
-    expect(over.state, BudgetState.exceeded);
-    expect(over.remaining, -30);
-    expect(over.percentageUsed, 130);
-  });
+  test(
+    'calculator marks 0 and 79 as normal, 80 and 100 as warning, above 100 as exceeded',
+    () {
+      final budget = _budget(100);
+      expect(
+        BudgetCalculator.progress(budget: budget, spent: 0).state,
+        BudgetState.normal,
+      );
+      expect(
+        BudgetCalculator.progress(budget: budget, spent: 79).state,
+        BudgetState.normal,
+      );
+      expect(
+        BudgetCalculator.progress(budget: budget, spent: 80).state,
+        BudgetState.warning,
+      );
+      expect(
+        BudgetCalculator.progress(budget: budget, spent: 100).state,
+        BudgetState.warning,
+      );
+      final over = BudgetCalculator.progress(budget: budget, spent: 130);
+      expect(over.state, BudgetState.exceeded);
+      expect(over.remaining, -30);
+      expect(over.percentageUsed, 130);
+    },
+  );
 
   test('monthly bounds and touching dates', () async {
     final bounds = DateRanges.monthBounds(DateTime(2026, 2, 10));
@@ -179,7 +191,11 @@ void main() {
               for (final entry in [
                 (spent: 10.0, label: 'Normal', color: AppColors.light.primary),
                 (spent: 80.0, label: 'Warning', color: AppColors.light.warning),
-                (spent: 140.0, label: 'Exceeded', color: AppColors.light.exceeded),
+                (
+                  spent: 140.0,
+                  label: 'Exceeded',
+                  color: AppColors.light.exceeded,
+                ),
               ])
                 BudgetProgressCard(
                   progress: BudgetCalculator.progress(

@@ -54,10 +54,7 @@ abstract final class DashboardMath {
     if (coveringToday.isEmpty) {
       return null;
     }
-    return coveringToday.fold<double>(
-      0,
-      (sum, item) => sum + item.remaining,
-    );
+    return coveringToday.fold<double>(0, (sum, item) => sum + item.remaining);
   }
 
   static List<BudgetProgress> overlappingMonth(

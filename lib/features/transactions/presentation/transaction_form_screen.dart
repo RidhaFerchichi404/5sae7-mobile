@@ -15,11 +15,7 @@ import '../domain/transaction_validation.dart';
 import 'transaction_providers.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
-  const TransactionFormScreen({
-    super.key,
-    required this.userId,
-    this.existing,
-  });
+  const TransactionFormScreen({super.key, required this.userId, this.existing});
 
   final int userId;
   final TransactionRecord? existing;
@@ -139,7 +135,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final expense = _type == AppConstants.expenseType;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.existing == null ? 'New transaction' : 'Edit transaction'),
+        title: Text(
+          widget.existing == null ? 'New transaction' : 'Edit transaction',
+        ),
       ),
       body: ListView(
         padding: AppSpacing.screen,
@@ -148,66 +146,71 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-          SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(
-                value: AppConstants.expenseType,
-                label: Text('Expense'),
-              ),
-              ButtonSegment(value: AppConstants.incomeType, label: Text('Income')),
-            ],
-            selected: {_type},
-            onSelectionChanged: (value) {
-              setState(() {
-                _type = value.first;
-                _category = null;
-              });
-            },
-          ),
-          AppSpacing.gap,
-          TextField(
-            key: const Key('transaction-amount'),
-            controller: _amount,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(
-              labelText: 'Amount',
-              suffixText: _currency,
-              errorText: _errors?.amountError,
-            ),
-          ),
-          AppSpacing.gap,
-          ListTile(
-            key: const Key('transaction-category'),
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Category'),
-            subtitle: Text(
-              _category?.name ?? 'Choose a category',
-              style: TextStyle(
-                color: _errors?.categoryError == null ? null : AppColors.of(context).exceeded,
-              ),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _pickCategory,
-          ),
-          if (_errors?.categoryError != null) Text(_errors!.categoryError!),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Date'),
-            subtitle: Text(_date),
-            onTap: _pickDate,
-          ),
-          if (_errors?.dateError != null) Text(_errors!.dateError!),
-          TextField(
-            controller: _description,
-            decoration: InputDecoration(
-              labelText: 'Description',
-              errorText: _errors?.descriptionError,
-            ),
-          ),
-          if (_formError != null) ...[
-            AppSpacing.gap,
-            Text(_formError!),
-          ],
+                SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(
+                      value: AppConstants.expenseType,
+                      label: Text('Expense'),
+                    ),
+                    ButtonSegment(
+                      value: AppConstants.incomeType,
+                      label: Text('Income'),
+                    ),
+                  ],
+                  selected: {_type},
+                  onSelectionChanged: (value) {
+                    setState(() {
+                      _type = value.first;
+                      _category = null;
+                    });
+                  },
+                ),
+                AppSpacing.gap,
+                TextField(
+                  key: const Key('transaction-amount'),
+                  controller: _amount,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Amount',
+                    suffixText: _currency,
+                    errorText: _errors?.amountError,
+                  ),
+                ),
+                AppSpacing.gap,
+                ListTile(
+                  key: const Key('transaction-category'),
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Category'),
+                  subtitle: Text(
+                    _category?.name ?? 'Choose a category',
+                    style: TextStyle(
+                      color: _errors?.categoryError == null
+                          ? null
+                          : AppColors.of(context).exceeded,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _pickCategory,
+                ),
+                if (_errors?.categoryError != null)
+                  Text(_errors!.categoryError!),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Date'),
+                  subtitle: Text(_date),
+                  onTap: _pickDate,
+                ),
+                if (_errors?.dateError != null) Text(_errors!.dateError!),
+                TextField(
+                  controller: _description,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                    errorText: _errors?.descriptionError,
+                  ),
+                ),
+                if (_formError != null) ...[AppSpacing.gap, Text(_formError!)],
               ],
             ),
           ),

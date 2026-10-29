@@ -41,7 +41,10 @@ class BudgetProgressCard extends StatelessWidget {
       child: Card(
         child: ListTile(
           onTap: onTap,
-          title: Text(categoryName, style: Theme.of(context).textTheme.titleMedium),
+          title: Text(
+            categoryName,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

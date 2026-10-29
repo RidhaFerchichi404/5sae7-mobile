@@ -31,7 +31,10 @@ class UserRepository {
     }
   }
 
-  Future<UserProfile> update(UserProfile user, UserValidationResult input) async {
+  Future<UserProfile> update(
+    UserProfile user,
+    UserValidationResult input,
+  ) async {
     _requireValid(input);
     final now = IsoTime.timestamp(IsoTime.now());
     try {

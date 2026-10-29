@@ -7,7 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/money.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
-import '../../../shared/widgets/loading_indicator.dart';
+import '../../../shared/widgets/rows_skeleton.dart';
 import '../../budgets/domain/budget.dart';
 import '../../users/domain/user_profile.dart';
 import '../../users/presentation/user_providers.dart';
@@ -44,10 +44,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     }
     final request = StatisticsRequest(userId: resolved, month: _month);
     final snapshot = ref.watch(statisticsSnapshotProvider(request));
-    final currency = ref.watch(userListProvider).maybeWhen(
-      data: (users) => _currencyOf(users, resolved),
-      orElse: () => AppConstants.defaultCurrency,
-    );
+    final currency = ref
+        .watch(userListProvider)
+        .maybeWhen(
+          data: (users) => _currencyOf(users, resolved),
+          orElse: () => AppConstants.defaultCurrency,
+        );
     return Scaffold(
       appBar: AppBar(title: const Text('Statistics')),
       body: Column(
@@ -68,9 +70,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           ),
           Expanded(
             child: snapshot.when(
-              loading: () => const LoadingIndicator(),
+              loading: () => const RowsSkeleton(),
               error: (error, _) => ErrorView(message: error.toString()),
-              data: (data) => _StatisticsBody(snapshot: data, currencyCode: currency),
+              data: (data) =>
+                  _StatisticsBody(snapshot: data, currencyCode: currency),
             ),
           ),
         ],
@@ -92,22 +95,32 @@ class _StatisticsBody extends StatelessWidget {
       (max, item) => item.amount > max ? item.amount : max,
     );
     final seriesMax = snapshot.series.fold<double>(0, (max, point) {
-      final peak = point.expenses > point.income ? point.expenses : point.income;
+      final peak = point.expenses > point.income
+          ? point.expenses
+          : point.income;
       return peak > max ? peak : max;
     });
     return ListView(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.sm,
+        0,
+        AppSpacing.sm,
+        AppSpacing.md,
+      ),
       children: [
-        Text('Income versus expenses', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          'Income versus expenses',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         AppSpacing.gap,
         FadeSlideIn(
           child: AmountBar(
-          label: 'Income',
-          amount: snapshot.income,
-          maxAmount: _peak(snapshot.income, snapshot.expenses),
-          currencyCode: currencyCode,
-          color: AppColors.of(context).income,
-        ),
+            label: 'Income',
+            amount: snapshot.income,
+            maxAmount: _peak(snapshot.income, snapshot.expenses),
+            currencyCode: currencyCode,
+            color: AppColors.of(context).income,
+          ),
         ),
         FadeSlideIn(
           index: 1,
@@ -127,7 +140,10 @@ class _StatisticsBody extends StatelessWidget {
           key: const Key('most-expensive'),
         ),
         AppSpacing.section,
-        Text('Expenses by category', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          'Expenses by category',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         if (snapshot.expensesByCategory.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
@@ -142,7 +158,10 @@ class _StatisticsBody extends StatelessWidget {
               currencyCode: currencyCode,
             ),
         AppSpacing.section,
-        Text('Spending evolution', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          'Spending evolution',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         for (final point in snapshot.series)
           AmountBar(
             label: formatMonth(point.month),
@@ -151,7 +170,10 @@ class _StatisticsBody extends StatelessWidget {
             currencyCode: currencyCode,
           ),
         AppSpacing.section,
-        Text('Budget consumption', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          'Budget consumption',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         if (snapshot.budgetConsumption.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),

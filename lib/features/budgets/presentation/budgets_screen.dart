@@ -7,7 +7,7 @@ import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/error_view.dart';
-import '../../../shared/widgets/loading_indicator.dart';
+import '../../../shared/widgets/rows_skeleton.dart';
 import '../../categories/presentation/category_providers.dart';
 import '../../users/domain/user_profile.dart';
 import '../../users/presentation/user_providers.dart';
@@ -24,10 +24,12 @@ class BudgetsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(budgetListProvider(userId));
     final categories = ref.watch(categoryListProvider(null));
-    final currency = ref.watch(userListProvider).maybeWhen(
-      data: (users) => _currencyOf(users, userId),
-      orElse: () => AppConstants.defaultCurrency,
-    );
+    final currency = ref
+        .watch(userListProvider)
+        .maybeWhen(
+          data: (users) => _currencyOf(users, userId),
+          orElse: () => AppConstants.defaultCurrency,
+        );
     final names = {
       for (final category in categories.maybeWhen(
         data: (value) => value,
@@ -48,7 +50,7 @@ class BudgetsScreen extends ConsumerWidget {
         child: const Icon(Icons.add),
       ),
       body: progress.when(
-        loading: () => const LoadingIndicator(),
+        loading: () => const RowsSkeleton(rows: 3, height: 104),
         error: (error, _) => ErrorView(message: error.toString()),
         data: (items) {
           if (items.isEmpty) {

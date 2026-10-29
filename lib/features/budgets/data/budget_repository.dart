@@ -50,7 +50,11 @@ class BudgetRepository {
   }) async {
     _requireValid(input);
     await _checkCategory(userId: current.userId, categoryId: input.categoryId);
-    await _rejectOverlap(userId: current.userId, input: input, exceptId: current.id);
+    await _rejectOverlap(
+      userId: current.userId,
+      input: input,
+      exceptId: current.id,
+    );
     try {
       final db = await _database.open();
       final count = await db.update(
@@ -137,7 +141,9 @@ class BudgetRepository {
   }) async {
     final category = await _categories.getById(categoryId);
     if (category.userId != userId || !category.isExpense) {
-      throw const ValidationFailure('Budgets apply only to expense categories.');
+      throw const ValidationFailure(
+        'Budgets apply only to expense categories.',
+      );
     }
   }
 

@@ -33,7 +33,9 @@ class _HomeShellState extends State<HomeShell> {
     ];
     return Scaffold(
       body: AnimatedSwitcher(
-        duration: AppMotion.duration,
+        duration: AppMotion.reduced(context)
+            ? Duration.zero
+            : AppMotion.duration,
         switchInCurve: AppMotion.curve,
         switchOutCurve: AppMotion.curve,
         child: KeyedSubtree(key: ValueKey(_index), child: pages[_index]),
@@ -42,7 +44,10 @@ class _HomeShellState extends State<HomeShell> {
         selectedIndex: _index,
         onDestinationSelected: (index) => setState(() => _index = index),
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Dashboard'),
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            label: 'Dashboard',
+          ),
           NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
             label: 'Transactions',
@@ -94,9 +99,9 @@ const _entries = [
 ];
 
 void _openCategories(BuildContext context, int userId) {
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => const CategoriesScreen()),
-  );
+  Navigator.of(
+    context,
+  ).push(MaterialPageRoute<void>(builder: (_) => const CategoriesScreen()));
 }
 
 void _openProfile(BuildContext context, int userId) {

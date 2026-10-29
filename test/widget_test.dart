@@ -40,7 +40,11 @@ void main() {
   ) async {
     await UserRepository(database).create(
       validateUserInput(
-        const UserInput(name: 'Amira', email: 'amira@email.com', currency: 'TND'),
+        const UserInput(
+          name: 'Amira',
+          email: 'amira@email.com',
+          currency: 'TND',
+        ),
       ),
     );
     await tester.pumpWidget(

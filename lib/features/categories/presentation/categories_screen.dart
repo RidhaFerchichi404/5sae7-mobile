@@ -8,7 +8,7 @@ import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
-import '../../../shared/widgets/loading_indicator.dart';
+import '../../../shared/widgets/rows_skeleton.dart';
 import '../../users/presentation/user_providers.dart';
 import '../domain/category.dart';
 import 'category_form_screen.dart';
@@ -46,16 +46,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
     }
   }
 
   Future<void> _offerReassign(Category category, String message) async {
-    final others = await ref.read(
-      categoryListProvider(category.type).future,
-    );
+    final others = await ref.read(categoryListProvider(category.type).future);
     final targets = others.where((item) => item.id != category.id).toList();
     if (!mounted) {
       return;
@@ -100,10 +98,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     if (target == null) {
       return;
     }
-    await ref.read(categoryRepositoryProvider).reassign(
-      fromId: category.id,
-      toId: target.id,
-    );
+    await ref
+        .read(categoryRepositoryProvider)
+        .reassign(fromId: category.id, toId: target.id);
     await ref.read(categoryRepositoryProvider).delete(category.id);
     ref.invalidate(categoryListProvider);
   }
@@ -137,12 +134,13 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 ),
               ],
               selected: {_type},
-              onSelectionChanged: (value) => setState(() => _type = value.first),
+              onSelectionChanged: (value) =>
+                  setState(() => _type = value.first),
             ),
           ),
           Expanded(
             child: categories.when(
-              loading: () => const LoadingIndicator(),
+              loading: () => const RowsSkeleton(rows: 6, height: 56),
               error: (error, _) => ErrorView(message: error.toString()),
               data: (items) {
                 if (items.isEmpty) {

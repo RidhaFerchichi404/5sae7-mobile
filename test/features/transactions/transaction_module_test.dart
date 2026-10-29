@@ -58,23 +58,26 @@ void main() {
     );
   });
 
-  test('stores an empty description as null and allows a future date', () async {
-    final user = await _user(users);
-    final food = await _expenseCategory(categories, user.id);
-    final created = await transactions.create(
-      userId: user.id,
-      input: _input(
-        amount: '4.5',
-        currency: 'TND',
-        date: '2099-01-15',
-        description: '   ',
-        category: food,
+  test(
+    'stores an empty description as null and allows a future date',
+    () async {
+      final user = await _user(users);
+      final food = await _expenseCategory(categories, user.id);
+      final created = await transactions.create(
         userId: user.id,
-      ),
-    );
-    expect(created.description, isNull);
-    expect(created.transactionDate, DateTime(2099, 1, 15));
-  });
+        input: _input(
+          amount: '4.5',
+          currency: 'TND',
+          date: '2099-01-15',
+          description: '   ',
+          category: food,
+          userId: user.id,
+        ),
+      );
+      expect(created.description, isNull);
+      expect(created.transactionDate, DateTime(2099, 1, 15));
+    },
+  );
 
   test('rejects a category whose type does not match', () async {
     final user = await _user(users);
@@ -217,7 +220,10 @@ void main() {
     }
     final recent = await transactions.listRecent(user.id);
     expect(recent, hasLength(5));
-    expect(recent.first.transactionDate.isAfter(recent.last.transactionDate), isTrue);
+    expect(
+      recent.first.transactionDate.isAfter(recent.last.transactionDate),
+      isTrue,
+    );
 
     await transactions.delete(updated.id);
     await expectLater(

@@ -9,7 +9,7 @@ import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/section_card.dart';
 import '../../../shared/widgets/error_view.dart';
-import '../../../shared/widgets/loading_indicator.dart';
+import '../../../shared/widgets/rows_skeleton.dart';
 import '../../budgets/domain/budget.dart';
 import '../../users/domain/user_profile.dart';
 import '../../users/presentation/user_providers.dart';
@@ -28,7 +28,7 @@ class DashboardScreen extends ConsumerWidget {
     final active = ref.watch(activeUserIdProvider);
     final resolved = userId ?? active.value;
     if (userId == null && active.isLoading) {
-      return const Scaffold(body: LoadingIndicator());
+      return const Scaffold(body: RowsSkeleton(height: 88));
     }
     if (resolved == null) {
       return const Scaffold(
@@ -36,14 +36,16 @@ class DashboardScreen extends ConsumerWidget {
       );
     }
     final snapshot = ref.watch(dashboardSnapshotProvider(resolved));
-    final currency = ref.watch(userListProvider).maybeWhen(
-      data: (users) => _currencyOf(users, resolved),
-      orElse: () => AppConstants.defaultCurrency,
-    );
+    final currency = ref
+        .watch(userListProvider)
+        .maybeWhen(
+          data: (users) => _currencyOf(users, resolved),
+          orElse: () => AppConstants.defaultCurrency,
+        );
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
       body: snapshot.when(
-        loading: () => const LoadingIndicator(),
+        loading: () => const RowsSkeleton(height: 88),
         error: (error, _) => ErrorView(
           message: error.toString(),
           onRetry: () => ref.invalidate(dashboardSnapshotProvider(resolved)),

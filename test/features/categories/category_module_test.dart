@@ -59,90 +59,116 @@ void main() {
     await categories.create(
       userId: user.id,
       input: validateCategoryInput(
-        const CategoryInput(name: 'Market', type: 'EXPENSE', icon: 'shopping_bag'),
+        const CategoryInput(
+          name: 'Market',
+          type: 'EXPENSE',
+          icon: 'shopping_bag',
+        ),
       ),
     );
     await expectLater(
       categories.create(
         userId: user.id,
         input: validateCategoryInput(
-          const CategoryInput(name: 'market', type: 'EXPENSE', icon: 'shopping_bag'),
+          const CategoryInput(
+            name: 'market',
+            type: 'EXPENSE',
+            icon: 'shopping_bag',
+          ),
         ),
       ),
       throwsA(isA<ConflictFailure>()),
     );
   });
 
-  test('refuses a type change while a transaction references the category', () async {
-    final user = await _user(users);
-    final category = await categories.create(
-      userId: user.id,
-      input: validateCategoryInput(
-        const CategoryInput(name: 'Market', type: 'EXPENSE', icon: 'shopping_bag'),
-      ),
-    );
-    await TransactionRepository(database, categories).create(
-      userId: user.id,
-      input: _expense(category, user.id, '10', '2026-03-02'),
-    );
-
-    await expectLater(
-      categories.update(
-        current: category,
+  test(
+    'refuses a type change while a transaction references the category',
+    () async {
+      final user = await _user(users);
+      final category = await categories.create(
+        userId: user.id,
         input: validateCategoryInput(
-          const CategoryInput(name: 'Market', type: 'INCOME', icon: 'shopping_bag'),
+          const CategoryInput(
+            name: 'Market',
+            type: 'EXPENSE',
+            icon: 'shopping_bag',
+          ),
         ),
-      ),
-      throwsA(isA<ValidationFailure>()),
-    );
-  });
+      );
+      await TransactionRepository(database, categories).create(
+        userId: user.id,
+        input: _expense(category, user.id, '10', '2026-03-02'),
+      );
 
-  test('restricts delete when a transaction or a budget still uses it', () async {
-    final user = await _user(users);
-    final food = await categories.create(
-      userId: user.id,
-      input: validateCategoryInput(
-        const CategoryInput(name: 'Food', type: 'EXPENSE', icon: 'restaurant'),
-      ),
-    );
-    final rent = await categories.create(
-      userId: user.id,
-      input: validateCategoryInput(
-        const CategoryInput(name: 'Rent', type: 'EXPENSE', icon: 'home'),
-      ),
-    );
-    await TransactionRepository(database, categories).create(
-      userId: user.id,
-      input: _expense(food, user.id, '8', '2026-03-02'),
-    );
-    await BudgetRepository(
-      database,
-      categories,
-      TransactionRepository(database, categories),
-    ).create(
-      userId: user.id,
-      input: validateBudgetInput(
-        BudgetInput(
-          limitText: '200',
-          currencyCode: 'TND',
-          period: 'CUSTOM',
-          startText: '2026-04-01',
-          endText: '2026-04-10',
-          category: rent,
-          userId: user.id,
+      await expectLater(
+        categories.update(
+          current: category,
+          input: validateCategoryInput(
+            const CategoryInput(
+              name: 'Market',
+              type: 'INCOME',
+              icon: 'shopping_bag',
+            ),
+          ),
         ),
-      ),
-    );
+        throwsA(isA<ValidationFailure>()),
+      );
+    },
+  );
 
-    await expectLater(
-      categories.delete(food.id),
-      throwsA(isA<RestrictFailure>()),
-    );
-    await expectLater(
-      categories.delete(rent.id),
-      throwsA(isA<RestrictFailure>()),
-    );
-  });
+  test(
+    'restricts delete when a transaction or a budget still uses it',
+    () async {
+      final user = await _user(users);
+      final food = await categories.create(
+        userId: user.id,
+        input: validateCategoryInput(
+          const CategoryInput(
+            name: 'Food',
+            type: 'EXPENSE',
+            icon: 'restaurant',
+          ),
+        ),
+      );
+      final rent = await categories.create(
+        userId: user.id,
+        input: validateCategoryInput(
+          const CategoryInput(name: 'Rent', type: 'EXPENSE', icon: 'home'),
+        ),
+      );
+      await TransactionRepository(database, categories).create(
+        userId: user.id,
+        input: _expense(food, user.id, '8', '2026-03-02'),
+      );
+      await BudgetRepository(
+        database,
+        categories,
+        TransactionRepository(database, categories),
+      ).create(
+        userId: user.id,
+        input: validateBudgetInput(
+          BudgetInput(
+            limitText: '200',
+            currencyCode: 'TND',
+            period: 'CUSTOM',
+            startText: '2026-04-01',
+            endText: '2026-04-10',
+            category: rent,
+            userId: user.id,
+          ),
+        ),
+      );
+
+      await expectLater(
+        categories.delete(food.id),
+        throwsA(isA<RestrictFailure>()),
+      );
+      await expectLater(
+        categories.delete(rent.id),
+        throwsA(isA<RestrictFailure>()),
+      );
+    },
+  );
 
   test('reassignment moves transactions and budgets', () async {
     final user = await _user(users);
@@ -155,7 +181,11 @@ void main() {
     final market = await categories.create(
       userId: user.id,
       input: validateCategoryInput(
-        const CategoryInput(name: 'Market', type: 'EXPENSE', icon: 'shopping_bag'),
+        const CategoryInput(
+          name: 'Market',
+          type: 'EXPENSE',
+          icon: 'shopping_bag',
+        ),
       ),
     );
     final transactions = TransactionRepository(database, categories);
@@ -208,8 +238,10 @@ void main() {
   testWidgets('blocked delete offers another category', (tester) async {
     final user = await _user(users);
     await categories.seedDefaultCategories(user.id);
-    final food = (await categories.list(userId: user.id, type: 'EXPENSE'))
-        .firstWhere((row) => row.name == 'Food');
+    final food = (await categories.list(
+      userId: user.id,
+      type: 'EXPENSE',
+    )).firstWhere((row) => row.name == 'Food');
     await TransactionRepository(database, categories).create(
       userId: user.id,
       input: _expense(food, user.id, '5', '2026-03-04'),

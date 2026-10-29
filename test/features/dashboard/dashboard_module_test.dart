@@ -38,13 +38,16 @@ void main() {
     expect(months.last, DateTime(2026, 3, 1));
   });
 
-  test('a tie for most expensive category uses the name in ascending order', () {
-    final winner = DashboardMath.mostExpensive(const [
-      CategoryTotal(categoryId: 2, name: 'Transport', amount: 50),
-      CategoryTotal(categoryId: 1, name: 'Food', amount: 50),
-    ]);
-    expect(winner?.name, 'Food');
-  });
+  test(
+    'a tie for most expensive category uses the name in ascending order',
+    () {
+      final winner = DashboardMath.mostExpensive(const [
+        CategoryTotal(categoryId: 2, name: 'Transport', amount: 50),
+        CategoryTotal(categoryId: 1, name: 'Food', amount: 50),
+      ]);
+      expect(winner?.name, 'Food');
+    },
+  );
 
   test('a budget outside today is left out of the remaining total', () {
     final old = BudgetCalculator.progress(
@@ -78,7 +81,11 @@ void main() {
 
     final user = await users.create(
       validateUserInput(
-        const UserInput(name: 'Amira', email: 'amira@email.com', currency: 'TND'),
+        const UserInput(
+          name: 'Amira',
+          email: 'amira@email.com',
+          currency: 'TND',
+        ),
       ),
     );
     await categories.seedDefaultCategories(user.id);
@@ -90,10 +97,14 @@ void main() {
         const CategoryInput(name: 'Campus', type: 'EXPENSE', icon: 'school'),
       ),
     );
-    final salary = (await categories.list(userId: user.id, type: 'INCOME'))
-        .firstWhere((row) => row.name == 'Salary');
-    final food = (await categories.list(userId: user.id, type: 'EXPENSE'))
-        .firstWhere((row) => row.name == 'Food');
+    final salary = (await categories.list(
+      userId: user.id,
+      type: 'INCOME',
+    )).firstWhere((row) => row.name == 'Salary');
+    final food = (await categories.list(
+      userId: user.id,
+      type: 'EXPENSE',
+    )).firstWhere((row) => row.name == 'Food');
 
     await _add(transactions, salary, user.id, '500', date, 'INCOME');
     await _add(transactions, campus, user.id, '40', date, 'EXPENSE');
@@ -125,16 +136,21 @@ void main() {
     final statistics = await reader.loadStatistics(user.id, today);
     expect(statistics.mostExpensive?.name, 'Campus');
     expect(statistics.series, hasLength(6));
-    expect(statistics.budgetConsumption.single.progress.state, BudgetState.exceeded);
+    expect(
+      statistics.budgetConsumption.single.progress.state,
+      BudgetState.exceeded,
+    );
 
     final db = await database.open();
     final tables = await db.rawQuery(
       "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
     );
-    expect(
-      tables.map((row) => row['name']).toSet(),
-      {'users', 'categories', 'transactions', 'budgets'},
-    );
+    expect(tables.map((row) => row['name']).toSet(), {
+      'users',
+      'categories',
+      'transactions',
+      'budgets',
+    });
     await database.close();
   });
 
@@ -145,7 +161,11 @@ void main() {
     final transactions = TransactionRepository(database, categories);
     final user = await users.create(
       validateUserInput(
-        const UserInput(name: 'Amira', email: 'amira@email.com', currency: 'TND'),
+        const UserInput(
+          name: 'Amira',
+          email: 'amira@email.com',
+          currency: 'TND',
+        ),
       ),
     );
     final food = await categories.create(

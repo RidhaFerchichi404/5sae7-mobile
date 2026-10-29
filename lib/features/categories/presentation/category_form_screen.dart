@@ -89,62 +89,66 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-          TextField(
-            key: const Key('category-name'),
-            controller: _name,
-            decoration: InputDecoration(
-              labelText: 'Name',
-              errorText: _errors?.nameError,
-            ),
-          ),
-          AppSpacing.gap,
-          SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(
-                value: AppConstants.expenseType,
-                label: Text('Expense'),
-              ),
-              ButtonSegment(
-                value: AppConstants.incomeType,
-                label: Text('Income'),
-              ),
-            ],
-            selected: {_type},
-            onSelectionChanged: (value) => setState(() => _type = value.first),
-          ),
-          if (_errors?.typeError != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(_errors!.typeError!),
-            ),
-          AppSpacing.section,
-          Text('Icon', style: Theme.of(context).textTheme.titleMedium),
-          AppSpacing.gap,
-          FadeSlideIn(
-            index: 2,
-            child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final key in AppConstants.iconCatalogue)
-                IconButton(
-                  key: Key('icon-$key'),
-                  onPressed: () => setState(() => _icon = key),
-                  style: IconButton.styleFrom(
-                    backgroundColor: _icon == key
-                        ? AppColors.of(context).secondary
-                        : null,
+                TextField(
+                  key: const Key('category-name'),
+                  controller: _name,
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    errorText: _errors?.nameError,
                   ),
-                  icon: Icon(iconForKey(key), color: AppColors.of(context).ink),
                 ),
-            ],
-          ),
-          ),
-          if (_errors?.iconError != null) Text(_errors!.iconError!),
-          if (_formError != null) ...[
-            AppSpacing.gap,
-            Text(_formError!, key: const Key('category-form-error')),
-          ],
+                AppSpacing.gap,
+                SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(
+                      value: AppConstants.expenseType,
+                      label: Text('Expense'),
+                    ),
+                    ButtonSegment(
+                      value: AppConstants.incomeType,
+                      label: Text('Income'),
+                    ),
+                  ],
+                  selected: {_type},
+                  onSelectionChanged: (value) =>
+                      setState(() => _type = value.first),
+                ),
+                if (_errors?.typeError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(_errors!.typeError!),
+                  ),
+                AppSpacing.section,
+                Text('Icon', style: Theme.of(context).textTheme.titleMedium),
+                AppSpacing.gap,
+                FadeSlideIn(
+                  index: 2,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final key in AppConstants.iconCatalogue)
+                        IconButton(
+                          key: Key('icon-$key'),
+                          onPressed: () => setState(() => _icon = key),
+                          style: IconButton.styleFrom(
+                            backgroundColor: _icon == key
+                                ? AppColors.of(context).secondary
+                                : null,
+                          ),
+                          icon: Icon(
+                            iconForKey(key),
+                            color: AppColors.of(context).ink,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                if (_errors?.iconError != null) Text(_errors!.iconError!),
+                if (_formError != null) ...[
+                  AppSpacing.gap,
+                  Text(_formError!, key: const Key('category-form-error')),
+                ],
               ],
             ),
           ),

@@ -18,8 +18,9 @@ final userListProvider = FutureProvider<List<UserProfile>>((ref) {
   return ref.watch(userRepositoryProvider).list();
 });
 
-final activeUserIdProvider =
-    AsyncNotifierProvider<ActiveUserController, int?>(ActiveUserController.new);
+final activeUserIdProvider = AsyncNotifierProvider<ActiveUserController, int?>(
+  ActiveUserController.new,
+);
 
 class ActiveUserController extends AsyncNotifier<int?> {
   @override

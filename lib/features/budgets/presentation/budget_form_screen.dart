@@ -54,7 +54,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
     final existing = widget.existing;
     Category? category;
     if (existing != null) {
-      category = await ref.read(categoryRepositoryProvider).getById(existing.categoryId);
+      category = await ref
+          .read(categoryRepositoryProvider)
+          .getById(existing.categoryId);
     }
     if (mounted) {
       setState(() {
@@ -160,68 +162,78 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Expense category'),
-            subtitle: Text(_category?.name ?? 'Choose a category'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () async {
-              final picked = await pickCategory(
-                context,
-                type: AppConstants.expenseType,
-              );
-              if (picked != null) {
-                setState(() => _category = picked);
-              }
-            },
-          ),
-          if (_errors?.categoryError != null) Text(_errors!.categoryError!),
-          TextField(
-            key: const Key('budget-limit'),
-            controller: _limit,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(
-              labelText: 'Amount limit',
-              suffixText: _currency,
-              errorText: _errors?.limitError,
-            ),
-          ),
-          AppSpacing.gap,
-          SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: AppConstants.monthlyPeriod, label: Text('Monthly')),
-              ButtonSegment(value: AppConstants.customPeriod, label: Text('Custom')),
-            ],
-            selected: {_period},
-            onSelectionChanged: (value) => setState(() => _period = value.first),
-          ),
-          AppSpacing.gap,
-          if (_period == AppConstants.monthlyPeriod)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Month'),
-              subtitle: Text(IsoTime.date(range.start)),
-              onTap: _pickMonth,
-            )
-          else ...[
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Start'),
-              subtitle: Text(IsoTime.date(_start)),
-              onTap: () => _pickBound(start: true),
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('End'),
-              subtitle: Text(IsoTime.date(_end)),
-              onTap: () => _pickBound(start: false),
-            ),
-          ],
-          if (_errors?.dateError != null) Text(_errors!.dateError!),
-          if (_formError != null) ...[
-            AppSpacing.gap,
-            Text(_formError!, key: const Key('budget-form-error')),
-          ],
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Expense category'),
+                  subtitle: Text(_category?.name ?? 'Choose a category'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    final picked = await pickCategory(
+                      context,
+                      type: AppConstants.expenseType,
+                    );
+                    if (picked != null) {
+                      setState(() => _category = picked);
+                    }
+                  },
+                ),
+                if (_errors?.categoryError != null)
+                  Text(_errors!.categoryError!),
+                TextField(
+                  key: const Key('budget-limit'),
+                  controller: _limit,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Amount limit',
+                    suffixText: _currency,
+                    errorText: _errors?.limitError,
+                  ),
+                ),
+                AppSpacing.gap,
+                SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(
+                      value: AppConstants.monthlyPeriod,
+                      label: Text('Monthly'),
+                    ),
+                    ButtonSegment(
+                      value: AppConstants.customPeriod,
+                      label: Text('Custom'),
+                    ),
+                  ],
+                  selected: {_period},
+                  onSelectionChanged: (value) =>
+                      setState(() => _period = value.first),
+                ),
+                AppSpacing.gap,
+                if (_period == AppConstants.monthlyPeriod)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Month'),
+                    subtitle: Text(IsoTime.date(range.start)),
+                    onTap: _pickMonth,
+                  )
+                else ...[
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Start'),
+                    subtitle: Text(IsoTime.date(_start)),
+                    onTap: () => _pickBound(start: true),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('End'),
+                    subtitle: Text(IsoTime.date(_end)),
+                    onTap: () => _pickBound(start: false),
+                  ),
+                ],
+                if (_errors?.dateError != null) Text(_errors!.dateError!),
+                if (_formError != null) ...[
+                  AppSpacing.gap,
+                  Text(_formError!, key: const Key('budget-form-error')),
+                ],
               ],
             ),
           ),

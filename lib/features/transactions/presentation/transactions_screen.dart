@@ -9,7 +9,7 @@ import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/error_view.dart';
-import '../../../shared/widgets/loading_indicator.dart';
+import '../../../shared/widgets/rows_skeleton.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/presentation/category_providers.dart';
 import '../../users/domain/user_profile.dart';
@@ -67,10 +67,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   Widget build(BuildContext context) {
     final items = ref.watch(transactionListProvider(_query));
     final categories = ref.watch(categoryListProvider(null));
-    final currency = ref.watch(userListProvider).maybeWhen(
-      data: (users) => _currencyOf(users, widget.userId),
-      orElse: () => AppConstants.defaultCurrency,
-    );
+    final currency = ref
+        .watch(userListProvider)
+        .maybeWhen(
+          data: (users) => _currencyOf(users, widget.userId),
+          orElse: () => AppConstants.defaultCurrency,
+        );
     return Scaffold(
       appBar: AppBar(title: const Text('Transactions')),
       floatingActionButton: FloatingActionButton(
@@ -183,13 +185,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           ),
           Expanded(
             child: items.when(
-              loading: () => const LoadingIndicator(),
+              loading: () => const RowsSkeleton(rows: 6, height: 72),
               error: (error, _) => ErrorView(message: error.toString()),
               data: (rows) {
                 if (rows.isEmpty) {
                   return const EmptyState(
                     title: 'No transactions',
-                    message: 'Add an income or an expense to start the history.',
+                    message:
+                        'Add an income or an expense to start the history.',
                   );
                 }
                 final names = {
@@ -214,7 +217,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                           padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                           child: Card(
                             child: ListTile(
-                              title: Text(names[rows[i].categoryId] ?? rows[i].type),
+                              title: Text(
+                                names[rows[i].categoryId] ?? rows[i].type,
+                              ),
                               subtitle: Text(
                                 '${IsoTime.date(rows[i].transactionDate)}'
                                 '${rows[i].description == null ? '' : ' · ${rows[i].description}'}',

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_motion.dart';
 
-/// Rises into place once. [index] only delays the start, then the animation ends.
+/// Rises 8px into place once. [index] staggers the start by
+/// [AppMotion.stagger], so list rows arrive one after another.
 class FadeSlideIn extends StatefulWidget {
   const FadeSlideIn({super.key, required this.child, this.index = 0});
 
@@ -16,13 +17,32 @@ class FadeSlideIn extends StatefulWidget {
 class _FadeSlideInState extends State<FadeSlideIn>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  late final Animation<double> _curved;
+  var _started = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: AppMotion.duration);
-    final steps = widget.index.clamp(0, 8);
-    Future<void>.delayed(Duration(milliseconds: 40 * steps), () {
+    _controller = AnimationController(
+      vsync: this,
+      duration: AppMotion.duration,
+    );
+    _curved = CurvedAnimation(parent: _controller, curve: AppMotion.enter);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) {
+      return;
+    }
+    _started = true;
+    if (AppMotion.reduced(context)) {
+      _controller.value = 1;
+      return;
+    }
+    final steps = widget.index.clamp(0, AppMotion.maxStaggerSteps);
+    Future<void>.delayed(AppMotion.stagger * steps, () {
       if (mounted) {
         _controller.forward();
       }
@@ -37,15 +57,15 @@ class _FadeSlideInState extends State<FadeSlideIn>
 
   @override
   Widget build(BuildContext context) {
-    final curved = CurvedAnimation(parent: _controller, curve: AppMotion.curve);
-    return FadeTransition(
-      opacity: curved,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.06),
-          end: Offset.zero,
-        ).animate(curved),
-        child: widget.child,
+    return AnimatedBuilder(
+      animation: _curved,
+      child: widget.child,
+      builder: (context, child) => Opacity(
+        opacity: _curved.value,
+        child: Transform.translate(
+          offset: Offset(0, 8 * (1 - _curved.value)),
+          child: child,
+        ),
       ),
     );
   }

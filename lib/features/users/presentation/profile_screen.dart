@@ -9,7 +9,7 @@ import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/section_card.dart';
 import '../../../shared/widgets/error_view.dart';
-import '../../../shared/widgets/loading_indicator.dart';
+import '../../../shared/widgets/rows_skeleton.dart';
 import '../domain/user_profile.dart';
 import 'edit_profile_screen.dart';
 import 'user_providers.dart';
@@ -23,7 +23,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userListProvider);
     return user.when(
-      loading: () => const Scaffold(body: LoadingIndicator()),
+      loading: () => const Scaffold(body: RowsSkeleton(rows: 3, height: 72)),
       error: (error, _) => Scaffold(body: ErrorView(message: error.toString())),
       data: (users) {
         final matches = users.where((item) => item.id == userId);

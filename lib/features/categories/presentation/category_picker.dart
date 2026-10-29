@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
-import '../../../shared/widgets/loading_indicator.dart';
+import '../../../shared/widgets/rows_skeleton.dart';
 import '../domain/category.dart';
 import 'category_icons.dart';
 import 'category_providers.dart';
@@ -18,11 +18,9 @@ class CategoryPickerPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = ref.watch(categoryListProvider(type));
     return Scaffold(
-      appBar: AppBar(
-        title: Text(type == null ? 'Category' : 'Choose $type'),
-      ),
+      appBar: AppBar(title: Text(type == null ? 'Category' : 'Choose $type')),
       body: categories.when(
-        loading: () => const LoadingIndicator(),
+        loading: () => const RowsSkeleton(rows: 6, height: 56),
         error: (error, _) => Center(child: Text(error.toString())),
         data: (items) {
           if (items.isEmpty) {
@@ -56,10 +54,7 @@ class CategoryPickerPage extends ConsumerWidget {
   }
 }
 
-Future<Category?> pickCategory(
-  BuildContext context, {
-  String? type,
-}) {
+Future<Category?> pickCategory(BuildContext context, {String? type}) {
   return Navigator.of(context).push<Category>(
     MaterialPageRoute(builder: (_) => CategoryPickerPage(type: type)),
   );

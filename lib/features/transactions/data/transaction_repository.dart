@@ -126,15 +126,12 @@ class TransactionRepository {
       TransactionSortField.amount => 't.amount $direction',
       TransactionSortField.categoryName => 'c.name COLLATE NOCASE $direction',
     };
-    final rows = await db.rawQuery(
-      '''
+    final rows = await db.rawQuery('''
       SELECT t.* FROM transactions t
       JOIN categories c ON c.id = t.category_id
       WHERE ${where.join(' AND ')}
       ORDER BY $order
-      ''',
-      args,
-    );
+      ''', args);
     return rows.map(_map).toList();
   }
 
@@ -179,15 +176,12 @@ class TransactionRepository {
       where.add('transaction_date <= ?');
       args.add(IsoTime.date(end));
     }
-    final rows = await db.rawQuery(
-      '''
+    final rows = await db.rawQuery('''
       SELECT category_id, COALESCE(SUM(amount), 0) AS total
       FROM transactions
       WHERE ${where.join(' AND ')}
       GROUP BY category_id
-      ''',
-      args,
-    );
+      ''', args);
     return {
       for (final row in rows)
         row['category_id']! as int: (row['total']! as num).toDouble(),
@@ -248,7 +242,9 @@ class TransactionRepository {
       amount: (row['amount']! as num).toDouble(),
       type: row['type']! as String,
       description: row['description'] as String?,
-      transactionDate: IsoTime.tryParseDate(row['transaction_date']! as String)!,
+      transactionDate: IsoTime.tryParseDate(
+        row['transaction_date']! as String,
+      )!,
       createdAt: DateTime.parse(row['created_at']! as String),
     );
   }

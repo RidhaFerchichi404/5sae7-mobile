@@ -39,8 +39,7 @@ class StatisticsRequest {
 
 final statisticsSnapshotProvider = FutureProvider.autoDispose
     .family<StatisticsSnapshot, StatisticsRequest>((ref, request) {
-      return ref.watch(dashboardReaderProvider).loadStatistics(
-        request.userId,
-        request.month,
-      );
+      return ref
+          .watch(dashboardReaderProvider)
+          .loadStatistics(request.userId, request.month);
     });

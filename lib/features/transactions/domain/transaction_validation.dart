@@ -57,7 +57,8 @@ class TransactionValidationResult {
 
 TransactionValidationResult validateTransactionInput(TransactionInput input) {
   final amountError = _amountError(input.amountText, input.currencyCode);
-  final amount = double.tryParse(input.amountText.trim().replaceAll(',', '.')) ?? 0;
+  final amount =
+      double.tryParse(input.amountText.trim().replaceAll(',', '.')) ?? 0;
 
   String? categoryError;
   final category = input.category;
