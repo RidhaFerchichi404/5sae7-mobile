@@ -1,8 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/network/api_client.dart';
 import '../../users/presentation/user_providers.dart';
+import '../data/iconify_client.dart';
 import '../domain/category.dart';
+
+final iconifyClientProvider = Provider<IconifyClient>((ref) {
+  return IconifyClient(ref.watch(apiClientProvider));
+});
+
+/// The SVG for an Iconify key, or null while offline with no cache.
+final iconSvgProvider = FutureProvider.family<String?, String>((ref, key) {
+  return ref.watch(iconifyClientProvider).svg(key);
+});
 
 final categoryListProvider = FutureProvider.family<List<Category>, String?>((
   ref,

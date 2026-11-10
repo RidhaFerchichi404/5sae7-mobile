@@ -14,6 +14,7 @@ import '../../users/presentation/user_providers.dart';
 import 'budget_form_screen.dart';
 import 'budget_progress_card.dart';
 import 'budget_providers.dart';
+import 'season_note.dart';
 
 class BudgetsScreen extends ConsumerWidget {
   const BudgetsScreen({super.key, required this.userId});
@@ -70,6 +71,10 @@ class BudgetsScreen extends ConsumerWidget {
                     categoryName:
                         names[items[i].budget.categoryId] ?? 'Category',
                     currencyCode: currency,
+                    note: SeasonNote(
+                      start: items[i].budget.startDate,
+                      end: items[i].budget.endDate,
+                    ),
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(

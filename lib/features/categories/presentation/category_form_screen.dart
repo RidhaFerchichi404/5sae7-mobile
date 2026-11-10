@@ -28,6 +28,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   late String _icon;
   CategoryValidationResult? _errors;
   String? _formError;
+  final _query = TextEditingController();
+  List<String> _results = const [];
+  bool _searching = false;
+  String? _searchMessage;
 
   @override
   void initState() {
@@ -40,7 +44,42 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   @override
   void dispose() {
     _name.dispose();
+    _query.dispose();
     super.dispose();
+  }
+
+  Future<void> _search() async {
+    if (_query.text.trim().isEmpty) {
+      return;
+    }
+    setState(() {
+      _searching = true;
+      _searchMessage = null;
+    });
+    final found = await ref.read(iconifyClientProvider).search(_query.text);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _searching = false;
+      _results = found.take(24).toList();
+      _searchMessage = found.isEmpty
+          ? 'No icons found. Check your connection or try another word.'
+          : null;
+    });
+  }
+
+  Widget _iconChoice(String key) {
+    final colors = AppColors.of(context);
+    return IconButton(
+      key: Key('icon-$key'),
+      tooltip: key,
+      onPressed: () => setState(() => _icon = key),
+      style: IconButton.styleFrom(
+        backgroundColor: _icon == key ? colors.secondary : null,
+      ),
+      icon: CategoryIcon(key, color: colors.ink),
+    );
   }
 
   Future<void> _save() async {
@@ -128,21 +167,44 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                     runSpacing: 8,
                     children: [
                       for (final key in AppConstants.iconCatalogue)
-                        IconButton(
-                          key: Key('icon-$key'),
-                          onPressed: () => setState(() => _icon = key),
-                          style: IconButton.styleFrom(
-                            backgroundColor: _icon == key
-                                ? AppColors.of(context).secondary
-                                : null,
-                          ),
-                          icon: Icon(
-                            iconForKey(key),
-                            color: AppColors.of(context).ink,
-                          ),
-                        ),
+                        _iconChoice(key),
                     ],
                   ),
+                ),
+                AppSpacing.gap,
+                TextField(
+                  key: const Key('icon-search'),
+                  controller: _query,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (_) => _search(),
+                  decoration: InputDecoration(
+                    labelText: 'Search more icons',
+                    helperText: 'Free icons from Iconify. Needs internet.',
+                    suffixIcon: IconButton(
+                      tooltip: 'Search icons',
+                      icon: const Icon(Icons.search),
+                      onPressed: _search,
+                    ),
+                  ),
+                ),
+                if (_searching) ...[
+                  AppSpacing.gap,
+                  const LinearProgressIndicator(),
+                ],
+                if (_searchMessage != null) ...[
+                  AppSpacing.gap,
+                  Text(_searchMessage!),
+                ],
+                AppSpacing.gap,
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    // Keep a searched icon visible once chosen.
+                    if (isIconifyKey(_icon) && !_results.contains(_icon))
+                      _iconChoice(_icon),
+                    for (final key in _results) _iconChoice(key),
+                  ],
                 ),
                 if (_errors?.iconError != null) Text(_errors!.iconError!),
                 if (_formError != null) ...[

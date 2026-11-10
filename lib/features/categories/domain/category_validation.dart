@@ -51,8 +51,8 @@ CategoryValidationResult validateCategoryInput(CategoryInput input) {
   }
 
   String? iconError;
-  if (!AppConstants.iconCatalogue.contains(icon)) {
-    iconError = 'Choose an icon from the catalogue.';
+  if (!AppConstants.iconCatalogue.contains(icon) && !isIconifyKey(icon)) {
+    iconError = 'Choose an icon from the catalogue or the search.';
   }
 
   return CategoryValidationResult(
@@ -66,3 +66,11 @@ CategoryValidationResult validateCategoryInput(CategoryInput input) {
 }
 
 String normalizedCategoryName(String name) => name.trim().toLowerCase();
+
+/// Iconify sets allowed in the search: all Apache 2.0 or MIT licensed.
+const iconifyPrefixes = ['mdi', 'tabler', 'material-symbols'];
+
+final _iconifyKey = RegExp(r'^(mdi|tabler|material-symbols):[a-z0-9-]{1,60}$');
+
+/// An icon from the Iconify search, stored as `prefix:name`.
+bool isIconifyKey(String icon) => _iconifyKey.hasMatch(icon);

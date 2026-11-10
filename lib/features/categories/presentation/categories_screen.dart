@@ -164,7 +164,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                           padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                           child: Card(
                             child: ListTile(
-                              leading: Icon(iconForKey(items[i].icon)),
+                              leading: CategoryIcon(items[i].icon),
                               title: Text(items[i].name),
                               subtitle: Text(
                                 isPredefinedCategory(items[i])

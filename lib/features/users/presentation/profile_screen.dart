@@ -12,6 +12,7 @@ import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/rows_skeleton.dart';
 import '../domain/user_profile.dart';
 import 'edit_profile_screen.dart';
+import 'profile_avatar.dart';
 import 'user_providers.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -68,17 +69,25 @@ class _ProfileBody extends ConsumerWidget {
         children: [
           FadeSlideIn(
             child: SectionCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    user.name,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    user.email,
-                    style: Theme.of(context).textTheme.bodySmall,
+                  ProfileAvatar(user: user, size: 56),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.name,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          user.email,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

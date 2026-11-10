@@ -8,10 +8,12 @@ import 'package:mybudget/core/errors/app_failure.dart';
 import 'package:mybudget/features/categories/data/category_repository.dart';
 import 'package:mybudget/features/categories/domain/category.dart';
 import 'package:mybudget/features/categories/domain/category_validation.dart';
+import 'package:mybudget/features/transactions/data/exchange_rate_client.dart';
 import 'package:mybudget/features/transactions/data/transaction_repository.dart';
 import 'package:mybudget/features/transactions/domain/transaction_query.dart';
 import 'package:mybudget/features/transactions/domain/transaction_validation.dart';
 import 'package:mybudget/features/transactions/presentation/transaction_form_screen.dart';
+import 'package:mybudget/features/transactions/presentation/transaction_providers.dart';
 import 'package:mybudget/features/transactions/presentation/transactions_screen.dart';
 import 'package:mybudget/features/users/data/user_repository.dart';
 import 'package:mybudget/features/users/domain/user_profile.dart';
@@ -247,6 +249,33 @@ void main() {
     expect(find.text('Choose a category.'), findsOneWidget);
   });
 
+  testWidgets('paying in another currency previews the conversion', (
+    tester,
+  ) async {
+    final user = await _user(users);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWith((ref) => database),
+          exchangeRateClientProvider.overrideWithValue(_FixedRates()),
+        ],
+        child: MaterialApp(home: TransactionFormScreen(userId: user.id)),
+      ),
+    );
+    await pumpFrames(tester);
+    await tester.enterText(find.byKey(const Key('transaction-amount')), '10');
+    await tester.tap(find.byKey(const Key('paid-in')));
+    await pumpFrames(tester);
+    await tester.tap(find.text('EUR').last);
+    await pumpFrames(tester);
+
+    expect(
+      find.textContaining('≈ 33.580 TND · 1 EUR = 3.3580 TND'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('exchangerate-api.com'), findsOneWidget);
+  });
+
   testWidgets('history is empty before the first transaction', (tester) async {
     final user = await _user(users);
     await tester.pumpWidget(
@@ -297,4 +326,12 @@ Future<Category> _expenseCategory(CategoryRepository categories, int userId) {
       const CategoryInput(name: 'Food', type: 'EXPENSE', icon: 'restaurant'),
     ),
   );
+}
+
+class _FixedRates implements ExchangeRateClient {
+  @override
+  Future<double?> rate(String from, String to) async => from == to ? 1 : 3.358;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

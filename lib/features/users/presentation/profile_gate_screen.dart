@@ -8,6 +8,7 @@ import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/section_card.dart';
 import '../domain/user_profile.dart';
 import '../domain/user_validation.dart';
+import 'profile_avatar.dart';
 import 'user_providers.dart';
 
 class ProfileGateScreen extends ConsumerStatefulWidget {
@@ -160,6 +161,7 @@ class _ProfileTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       child: ListTile(
+        leading: ProfileAvatar(user: user),
         title: Text(user.name),
         subtitle: Text(user.email),
         trailing: Text(user.currency),

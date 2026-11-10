@@ -39,7 +39,7 @@ class CategoryPickerPage extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                     child: Card(
                       child: ListTile(
-                        leading: Icon(iconForKey(items[i].icon)),
+                        leading: CategoryIcon(items[i].icon),
                         title: Text(items[i].name),
                         onTap: () => Navigator.of(context).pop(items[i]),
                       ),

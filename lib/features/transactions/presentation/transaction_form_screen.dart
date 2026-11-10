@@ -6,10 +6,12 @@ import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/iso_time.dart';
+import '../../../core/utils/money.dart';
 import '../../../shared/widgets/section_card.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/presentation/category_picker.dart';
 import '../../users/presentation/user_providers.dart';
+import '../data/exchange_rate_client.dart';
 import '../domain/transaction_record.dart';
 import '../domain/transaction_validation.dart';
 import 'transaction_providers.dart';
@@ -34,6 +36,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   TransactionValidationResult? _errors;
   String? _formError;
   String _currency = AppConstants.defaultCurrency;
+
+  /// A foreign currency the amount was paid in, or null for the profile's.
+  String? _paidIn;
+  double? _rate;
+  bool _rateLoading = false;
 
   @override
   void initState() {
@@ -94,17 +101,99 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
+  Future<void> _choosePaidIn(String code) async {
+    final foreign = code == _currency ? null : code;
+    setState(() {
+      _paidIn = foreign;
+      _rate = null;
+      _formError = null;
+      _rateLoading = foreign != null;
+    });
+    if (foreign == null) {
+      return;
+    }
+    final rate = await ref
+        .read(exchangeRateClientProvider)
+        .rate(foreign, _currency);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _rateLoading = false;
+      if (_paidIn == foreign) {
+        _rate = rate;
+      }
+    });
+  }
+
+  String _conversionText() {
+    final foreign = _paidIn!;
+    final rate = _rate;
+    if (_rateLoading) {
+      return "Getting today's $foreign rate…";
+    }
+    if (rate == null) {
+      return 'No $foreign rate available. Connect to the internet.';
+    }
+    final amount = double.tryParse(_amount.text.trim().replaceAll(',', '.'));
+    final converted = amount == null
+        ? ''
+        : '≈ ${Money.format(amount * rate, _currency)} $_currency · ';
+    return '${converted}1 $foreign = ${rate.toStringAsFixed(4)} $_currency'
+        ' · ${ExchangeRateClient.attribution}';
+  }
+
+  TransactionInput _input(String amountText, String currency, String note) {
+    return TransactionInput(
+      amountText: amountText,
+      currencyCode: currency,
+      type: _type,
+      category: _category,
+      userId: widget.userId,
+      dateText: _date,
+      description: note,
+    );
+  }
+
   Future<void> _save() async {
+    var amountText = _amount.text;
+    var description = _description.text;
+    final foreign = _paidIn;
+    if (foreign != null) {
+      // Validate in the paid currency, then store the converted amount and
+      // keep the original in the description (the schema has no column).
+      final paid = validateTransactionInput(
+        _input(amountText, foreign, description),
+      );
+      if (paid.amountError != null) {
+        setState(() {
+          _errors = paid;
+          _formError = null;
+        });
+        return;
+      }
+      final rate =
+          _rate ??
+          await ref.read(exchangeRateClientProvider).rate(foreign, _currency);
+      if (!mounted) {
+        return;
+      }
+      if (rate == null) {
+        setState(
+          () => _formError =
+              'Could not get the $foreign rate. Connect to the internet '
+              'or enter the amount in $_currency.',
+        );
+        return;
+      }
+      amountText = Money.format(paid.amount * rate, _currency);
+      final note = '${Money.format(paid.amount, foreign)} $foreign';
+      description = description.trim().isEmpty
+          ? note
+          : '${description.trim()} · $note';
+    }
     final result = validateTransactionInput(
-      TransactionInput(
-        amountText: _amount.text,
-        currencyCode: _currency,
-        type: _type,
-        category: _category,
-        userId: widget.userId,
-        dateText: _date,
-        description: _description.text,
-      ),
+      _input(amountText, _currency, description),
     );
     setState(() {
       _errors = result;
@@ -166,18 +255,62 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   },
                 ),
                 AppSpacing.gap,
-                TextField(
-                  key: const Key('transaction-amount'),
-                  controller: _amount,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: 'Amount',
-                    suffixText: _currency,
-                    errorText: _errors?.amountError,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        key: const Key('transaction-amount'),
+                        controller: _amount,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        onChanged: (_) {
+                          if (_paidIn != null) {
+                            setState(() {});
+                          }
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Amount',
+                          suffixText: _paidIn ?? _currency,
+                          errorText: _errors?.amountError,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    SizedBox(
+                      width: 104,
+                      // Rebuilt once the profile currency loads.
+                      child: KeyedSubtree(
+                        key: ValueKey(_currency),
+                        child: DropdownButtonFormField<String>(
+                          key: const Key('paid-in'),
+                          initialValue: _paidIn ?? _currency,
+                          decoration: const InputDecoration(
+                            labelText: 'Paid in',
+                          ),
+                          items: [
+                            for (final code in AppConstants.currencies)
+                              DropdownMenuItem(value: code, child: Text(code)),
+                          ],
+                          onChanged: (code) {
+                            if (code != null) {
+                              _choosePaidIn(code);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                if (_paidIn != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    _conversionText(),
+                    key: const Key('conversion-preview'),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
                 AppSpacing.gap,
                 ListTile(
                   key: const Key('transaction-category'),

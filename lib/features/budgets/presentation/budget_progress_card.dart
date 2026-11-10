@@ -14,6 +14,7 @@ class BudgetProgressCard extends StatelessWidget {
     required this.currencyCode,
     this.onTap,
     this.onDelete,
+    this.note,
   });
 
   final BudgetProgress progress;
@@ -21,6 +22,9 @@ class BudgetProgressCard extends StatelessWidget {
   final String currencyCode;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
+
+  /// Extra line under the state, e.g. holidays in the period.
+  final Widget? note;
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +77,7 @@ class BudgetProgressCard extends StatelessWidget {
                 key: Key('budget-state-$label'),
                 style: TextStyle(color: color, fontWeight: FontWeight.w600),
               ),
+              ?note,
             ],
           ),
           trailing: IconButton(
