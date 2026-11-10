@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_failure.dart';
@@ -12,6 +13,7 @@ import '../../categories/domain/category.dart';
 import '../../categories/presentation/category_picker.dart';
 import '../../users/presentation/user_providers.dart';
 import '../data/exchange_rate_client.dart';
+import '../domain/receipt_parser.dart';
 import '../domain/transaction_record.dart';
 import '../domain/transaction_validation.dart';
 import 'transaction_providers.dart';
@@ -41,6 +43,74 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   String? _paidIn;
   double? _rate;
   bool _rateLoading = false;
+  bool _scanning = false;
+
+  /// Fills amount, date and description from a receipt photo. The user
+  /// still picks the category and checks everything before saving.
+  Future<void> _scanReceipt() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (sheet) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Take a photo'),
+              onTap: () => Navigator.of(sheet).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Choose from gallery'),
+              onTap: () => Navigator.of(sheet).pop(ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null || !mounted) {
+      return;
+    }
+    setState(() => _scanning = true);
+    String? text;
+    try {
+      text = await ref.read(receiptScannerProvider).read(source);
+    } catch (_) {
+      text = '';
+    }
+    if (!mounted) {
+      return;
+    }
+    setState(() => _scanning = false);
+    if (text == null) {
+      return; // Cancelled.
+    }
+    final draft = parseReceipt(text, today: IsoTime.now());
+    setState(() {
+      if (_type != AppConstants.expenseType) {
+        _type = AppConstants.expenseType;
+        _category = null;
+      }
+      if (draft.total case final total?) {
+        _amount.text = Money.format(total, _paidIn ?? _currency);
+      }
+      if (draft.date case final date?) {
+        _date = IsoTime.date(date);
+      }
+      if (draft.merchant case final name? when _description.text.isEmpty) {
+        _description.text = name;
+      }
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          draft.total == null
+              ? 'No total found. Try a sharper, flat photo.'
+              : 'Filled from the receipt. Check it, then pick a category.',
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -227,6 +297,20 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         title: Text(
           widget.existing == null ? 'New transaction' : 'Edit transaction',
         ),
+        actions: [
+          IconButton(
+            key: const Key('scan-receipt'),
+            tooltip: 'Scan receipt',
+            icon: const Icon(Icons.document_scanner_outlined),
+            onPressed: _scanning ? null : _scanReceipt,
+          ),
+        ],
+        bottom: _scanning
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(2),
+                child: LinearProgressIndicator(minHeight: 2),
+              )
+            : null,
       ),
       body: ListView(
         padding: AppSpacing.screen,

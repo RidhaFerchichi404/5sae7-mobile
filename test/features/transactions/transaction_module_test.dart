@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mybudget/core/constants/app_constants.dart';
 import 'package:mybudget/core/database/app_database.dart';
 import 'package:mybudget/core/database/database_provider.dart';
@@ -9,6 +10,7 @@ import 'package:mybudget/features/categories/data/category_repository.dart';
 import 'package:mybudget/features/categories/domain/category.dart';
 import 'package:mybudget/features/categories/domain/category_validation.dart';
 import 'package:mybudget/features/transactions/data/exchange_rate_client.dart';
+import 'package:mybudget/features/transactions/data/receipt_scanner.dart';
 import 'package:mybudget/features/transactions/data/transaction_repository.dart';
 import 'package:mybudget/features/transactions/domain/transaction_query.dart';
 import 'package:mybudget/features/transactions/domain/transaction_validation.dart';
@@ -276,6 +278,30 @@ void main() {
     expect(find.textContaining('exchangerate-api.com'), findsOneWidget);
   });
 
+  testWidgets('scanning a receipt fills the amount and description', (
+    tester,
+  ) async {
+    final user = await _user(users);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWith((ref) => database),
+          receiptScannerProvider.overrideWithValue(_FakeScanner()),
+        ],
+        child: MaterialApp(home: TransactionFormScreen(userId: user.id)),
+      ),
+    );
+    await pumpFrames(tester);
+    await tester.tap(find.byKey(const Key('scan-receipt')));
+    await pumpFrames(tester);
+    await tester.tap(find.text('Choose from gallery'));
+    await pumpFrames(tester);
+
+    expect(find.text('14.050'), findsOneWidget);
+    expect(find.text('Magasin General'), findsOneWidget);
+    expect(find.textContaining('Filled from the receipt'), findsOneWidget);
+  });
+
   testWidgets('history is empty before the first transaction', (tester) async {
     final user = await _user(users);
     await tester.pumpWidget(
@@ -334,4 +360,10 @@ class _FixedRates implements ExchangeRateClient {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeScanner implements ReceiptScanner {
+  @override
+  Future<String?> read(ImageSource source) async =>
+      'MAGASIN GENERAL\nTOTAL TTC 14,050\nESPECES 20,000';
 }
